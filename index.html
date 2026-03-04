@@ -3,105 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎問卷認證碼查詢器 (智能追蹤版)</title>
+    <title>壽司郎認證碼查詢器 (2026 終極版)</title>
     <style>
-        body {
-            font-family: "Microsoft JhengHei", Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        h2 {
-            color: #d32f2f;
-            margin-bottom: 20px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .btn-search {
-            background-color: #d32f2f;
-            color: white;
-        }
-        .btn-search:hover { background-color: #b71c1c; }
+        :root { --primary-red: #d32f2f; --primary-blue: #1976d2; }
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 420px; width: 90%; }
+        h2 { color: var(--primary-red); margin-bottom: 20px; border-bottom: 2px solid var(--primary-red); padding-bottom: 10px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
+        select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: 0.3s; font-weight: bold; margin-top: 10px; }
+        .btn-search { background-color: var(--primary-red); color: white; }
+        .btn-search:hover { background-color: #b71c1c; transform: translateY(-2px); }
+        .btn-update { background-color: var(--primary-blue); color: white; font-size: 15px; }
+        .btn-update:disabled { background-color: #ccc; cursor: not-allowed; }
         
-        .btn-update {
-            background-color: #1976d2;
-            color: white;
-            font-size: 16px;
-        }
-        .btn-update:hover { background-color: #1565c0; }
-        .btn-update:disabled {
-            background-color: #90caf9;
-            cursor: not-allowed;
-        }
-
-        #result {
-            margin-top: 25px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            min-height: 1.2em;
-            padding: 15px;
-            background: #fff3e0;
-            border-radius: 5px;
-            border: 1px dashed #ff9800;
-            display: none;
-        }
-        
-        #statusMessage {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #2e7d32;
-            font-weight: bold;
-            min-height: 35px;
-            line-height: 1.4;
-        }
-
-        .note {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
-            text-align: left;
-            line-height: 1.5;
-        }
+        #status { margin: 10px 0; font-size: 13px; color: #666; min-height: 20px; line-height: 1.4; }
+        #result-box { margin-top: 20px; padding: 20px; background: #fff8e1; border-radius: 10px; border: 2px dashed #ffb300; display: none; position: relative; }
+        #code-text { font-size: 32px; color: var(--primary-red); display: block; margin: 10px 0; letter-spacing: 2px; }
+        .copy-hint { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
+        .note { margin-top: 20px; font-size: 12px; color: #999; text-align: left; }
     </style>
 </head>
 <body>
@@ -109,186 +30,133 @@
 <div class="container">
     <h2>🍣 壽司郎認證碼查詢</h2>
     
-    <button class="btn-update" id="updateBtn" onclick="fetchLatestData()">🔄 自動尋找並更新最新代碼</button>
-    <div id="statusMessage"></div>
+    <button class="btn-update" id="updateBtn" onclick="smartFetch()">🔄 點此更新 2026 最新代碼</button>
+    <div id="status">準備就緒</div>
 
-    <div class="input-group" style="margin-top: 10px;">
-        <label for="year">年份 (西元)</label>
-        <select id="year">
-            <option value="2026">2026</option>
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-        </select>
+    <div class="input-group">
+        <label>年份</label>
+        <select id="yearSelect"><option value="2026">2026</option><option value="2025">2025</option></select>
     </div>
 
     <div class="input-group">
-        <label for="month">月份</label>
-        <select id="month">
-            <option value="1">1月</option>
-            <option value="2">2月</option>
-            <option value="3">3月</option>
-            <option value="4">4月</option>
-            <option value="5">5月</option>
-            <option value="6">6月</option>
-            <option value="7">7月</option>
-            <option value="8">8月</option>
-            <option value="9">9月</option>
-            <option value="10">10月</option>
-            <option value="11">11月</option>
-            <option value="12">12月</option>
+        <label>月份</label>
+        <select id="monthSelect">
+            <option value="1">1月</option><option value="2">2月</option><option value="3" selected>3月</option>
+            <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+            <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+            <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
         </select>
     </div>
 
-    <button class="btn-search" onclick="findCode()">🔍 查詢序號</button>
+    <button class="btn-search" onclick="displayResult()">🔍 立即查詢</button>
 
-    <div id="result"></div>
-    
+    <div id="result-box">
+        <span id="result-title" style="font-weight: bold; color: #555;"></span>
+        <strong id="code-text">-----</strong>
+        <span class="copy-hint" onclick="copyCode()">點擊此處複製代碼</span>
+    </div>
+
     <div class="note">
-        ※ 資料來源：backpackers4u 部落格首頁<br>
-        ※ 系統會自動前往該部落格首頁尋找最新的壽司郎文章，並解析內文以取得最新代碼。
+        ※ 自動抓取標題包含「2026 台灣壽司郎」、「月份」與「認證碼」之文章。<br>
+        ※ 資料來源：backpackers4u 部落格。
     </div>
 </div>
 
 <script>
-    // 預設的本地資料庫 (作為基底)
-    const sushiroData = {
-        "2026": { "1": "88409" },
-        "2025": { "12": "34652", "11": "26758", "10": "95721", "9": "66048", "8": "88577", "7": "15453", "6": "63832", "5": "34747", "4": "95343", "3": "72125", "2": "21179", "1": "53069" },
-        "2024": { "12": "58182", "11": "64441", "10": "75313", "9": "50154", "8": "75679", "7": "74276", "6": "44050", "5": "11324", "4": "46619", "3": "47337", "2": "98989", "1": "46860" }
+    // 初始資料庫
+    let sushiroData = {
+        "2026": { "1": "88409", "2": "24618" },
+        "2025": { "12": "34652", "11": "26758", "10": "95721" }
     };
 
-    // 查詢序號功能
-    function findCode() {
-        const year = document.getElementById('year').value;
-        const month = document.getElementById('month').value;
-        const resultDiv = document.getElementById('result');
+    function displayResult() {
+        const y = document.getElementById('yearSelect').value;
+        const m = document.getElementById('monthSelect').value;
+        const box = document.getElementById('result-box');
+        const codeDisplay = document.getElementById('code-text');
+        const titleDisplay = document.getElementById('result-title');
 
-        if (sushiroData[year] && sushiroData[year][month]) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em;">${sushiroData[year][month]}</span>`;
+        if (sushiroData[y] && sushiroData[y][m]) {
+            box.style.display = 'block';
+            titleDisplay.innerText = `${y}年 ${m}月 認證碼`;
+            codeDisplay.innerText = sushiroData[y][m];
         } else {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `<span style="color:#777; font-size: 16px;">查無 ${year}年${month}月 的資料。<br>請點擊上方的「自動更新」按鈕抓取。</span>`;
+            alert(`目前尚無 ${y}年${m}月 的資料，請點擊更新按鈕試試！`);
         }
     }
 
-    // 自動抓取最新資料功能 (兩階段抓取)
-    async function fetchLatestData() {
+    function copyCode() {
+        const code = document.getElementById('code-text').innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            const hint = document.querySelector('.copy-hint');
+            hint.innerText = "✅ 已複製到剪貼簿！";
+            hint.style.color = "#2e7d32";
+            setTimeout(() => { hint.innerText = "點擊此處複製代碼"; hint.style.color = "#888"; }, 2000);
+        });
+    }
+
+    async function smartFetch() {
         const btn = document.getElementById('updateBtn');
-        const statusMsg = document.getElementById('statusMessage');
-        const blogHomeUrl = 'https://backpackers4u.pixnet.net/blog';
-        
+        const status = document.getElementById('status');
+        const proxy = "https://api.allorigins.win/get?url=";
+        const blogUrl = "https://backpackers4u.pixnet.net/blog";
+
         btn.disabled = true;
-        btn.innerText = "⏳ 執行中，請稍候...";
-        statusMsg.style.color = "#f57c00";
+        status.innerText = "正在掃描部落格首頁...";
 
         try {
-            // 【第一階段】：去部落格首頁尋找最新的文章連結
-            statusMsg.innerText = "正在掃描部落格首頁，尋找最新文章...";
-            const proxyHomeUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(blogHomeUrl)}`;
-            const homeResponse = await fetch(proxyHomeUrl);
-            if (!homeResponse.ok) throw new Error('首頁讀取失敗');
-            
-            const homeData = await homeResponse.json();
-            
-            // 將字串轉為 HTML DOM 方便搜尋
+            const res = await fetch(proxy + encodeURIComponent(blogUrl));
+            const data = await res.json();
             const parser = new DOMParser();
-            const doc = parser.parseFromString(homeData.contents, 'text/html');
+            const doc = parser.parseFromString(data.contents, "text/html");
             const links = doc.querySelectorAll('a');
-            
-            let targetArticleUrl = '';
-            
-            // 尋找包含「壽司郎」字眼的連結
+
+            let targetUrl = "";
+            // 關鍵字比對：必須包含「壽司郎」且包含「認證碼」或「月份」
             for (let a of links) {
-                if (a.textContent.includes('壽司郎') && a.getAttribute('href') && a.getAttribute('href').includes('/blog/post/')) {
-                    const href = a.getAttribute('href');
-                    targetArticleUrl = href.startsWith('http') ? href : 'https://backpackers4u.pixnet.net' + href;
-                    break; // 找到第一篇(最新的)就跳出
+                const text = a.innerText || "";
+                if (text.includes("壽司郎") && (text.includes("月份") || text.includes("認證碼"))) {
+                    targetUrl = a.href.includes('http') ? a.href : "https://backpackers4u.pixnet.net" + a.getAttribute('href');
+                    status.innerText = `找到目標文章：${text.substring(0, 15)}...`;
+                    break;
                 }
             }
 
-            // 如果首頁找不到，就退回使用已知的文章網址
-            if (!targetArticleUrl) {
-                statusMsg.innerText = "首頁找不到新文章，嘗試讀取原文章...";
-                targetArticleUrl = 'https://backpackers4u.pixnet.net/blog/post/221333427';
-            } else {
-                statusMsg.innerText = "找到最新文章！正在解析代碼內容...";
-            }
+            if (!targetUrl) throw new Error("找不到相關文章，請確認網址是否正確。");
 
-            // 【第二階段】：去找到的那篇文章裡面抓取代碼
-            const proxyArticleUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetArticleUrl)}`;
-            const articleResponse = await fetch(proxyArticleUrl);
-            if (!articleResponse.ok) throw new Error('文章內容讀取失敗');
-            
-            const articleData = await articleResponse.json();
-            const htmlContent = articleData.contents;
+            // 第二階段：抓取內文
+            status.innerText = "正在解析最新月份代碼...";
+            const res2 = await fetch(proxy + encodeURIComponent(targetUrl));
+            const data2 = await res2.json();
+            const content = data2.contents;
 
-            // 正規表達式：找出「台灣壽司郎 20xx年 x月 認證碼 xxxxx」的格式
-            const regex = /台灣壽司郎\s*(20\d{2})\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
+            // 抓取格式：2026 1月份 認證碼88409 或 2026年2月 12345
+            const regex = /(20\d{2})\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
             let match;
-            let foundCount = 0;
+            let count = 0;
 
-            while ((match = regex.exec(htmlContent)) !== null) {
-                const year = match[1];
-                const month = match[2];
-                const code = match[3];
-
-                if (!sushiroData[year]) {
-                    sushiroData[year] = {};
-                }
-                
-                sushiroData[year][month] = code;
-                foundCount++;
-                
-                // 動態增加下拉選單的年份
-                const yearSelect = document.getElementById('year');
-                if (!yearSelect.querySelector(`option[value="${year}"]`)) {
-                    const newOption = document.createElement('option');
-                    newOption.value = year;
-                    newOption.text = year;
-                    yearSelect.insertBefore(newOption, yearSelect.firstChild);
-                }
+            while ((match = regex.exec(content)) !== null) {
+                const y = match[1], m = match[2], c = match[3];
+                if (!sushiroData[y]) sushiroData[y] = {};
+                sushiroData[y][m] = c;
+                count++;
             }
 
-            if (foundCount > 0) {
-                statusMsg.style.color = "#2e7d32";
-                statusMsg.innerText = `✅ 更新成功！共從最新文章解析出 ${foundCount} 筆代碼資料。`;
-                findCode(); // 自動重新查詢
+            if (count > 0) {
+                status.style.color = "#2e7d32";
+                status.innerText = `✅ 成功更新！共抓取到 ${count} 個月份的代碼。`;
+                displayResult();
             } else {
-                statusMsg.style.color = "#d32f2f";
-                statusMsg.innerText = "⚠️ 抓取成功，但文章內沒有找到符合格式的代碼。";
+                status.innerText = "⚠ 抓取完畢，但未在文章內發現代碼格式。";
             }
 
-        } catch (error) {
-            console.error("Fetch error: ", error);
-            statusMsg.style.color = "#d32f2f";
-            statusMsg.innerText = "❌ 更新失敗，可能是網路問題或代理伺服器忙碌，請稍後再試。";
+        } catch (err) {
+            status.style.color = "red";
+            status.innerText = "❌ 更新失敗，請稍後再試。";
+            console.error(err);
         } finally {
             btn.disabled = false;
-            btn.innerText = "🔄 自動尋找並更新最新代碼";
-            
-            setTimeout(() => {
-                if(statusMsg.innerText.includes("更新成功")) {
-                    statusMsg.innerText = "";
-                }
-            }, 5000);
         }
-    }
-    
-    // 初始化設定選單為當前時間
-    window.onload = function() {
-        const now = new Date();
-        const currentYear = now.getFullYear().toString();
-        const currentMonth = (now.getMonth() + 1).toString();
-        
-        const yearSelect = document.getElementById('year');
-        if (yearSelect.querySelector(`option[value="${currentYear}"]`)) {
-            yearSelect.value = currentYear;
-        }
-        document.getElementById('month').value = currentMonth;
-        
-        findCode();
     }
 </script>
 
