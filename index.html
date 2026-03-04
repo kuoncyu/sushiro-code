@@ -3,156 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎認證碼查詢器 (2026 終極版)</title>
+    <title>壽司郎認證碼 - 深度掃描版</title>
     <style>
-        :root { --primary-red: #d32f2f; --primary-blue: #1976d2; }
-        body { font-family: "Microsoft JhengHei", Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 420px; width: 90%; }
-        h2 { color: var(--primary-red); margin-bottom: 20px; border-bottom: 2px solid var(--primary-red); padding-bottom: 10px; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
-        select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: 0.3s; font-weight: bold; margin-top: 10px; }
-        .btn-search { background-color: var(--primary-red); color: white; }
-        .btn-search:hover { background-color: #b71c1c; transform: translateY(-2px); }
-        .btn-update { background-color: var(--primary-blue); color: white; font-size: 15px; }
-        .btn-update:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        #status { margin: 10px 0; font-size: 13px; color: #666; min-height: 20px; line-height: 1.4; }
-        #result-box { margin-top: 20px; padding: 20px; background: #fff8e1; border-radius: 10px; border: 2px dashed #ffb300; display: none; position: relative; }
-        #code-text { font-size: 32px; color: var(--primary-red); display: block; margin: 10px 0; letter-spacing: 2px; }
-        .copy-hint { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
-        .note { margin-top: 20px; font-size: 12px; color: #999; text-align: left; }
+        :root { --sushi-red: #d32f2f; --sushi-gold: #ffb300; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        h2 { color: var(--sushi-red); margin-bottom: 20px; border-bottom: 3px solid var(--sushi-red); display: inline-block; }
+        .card { background: #fffcf0; border: 1px solid #ffe082; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+        select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-update { background: #007bff; color: white; margin-bottom: 15px; }
+        .btn-update:disabled { background: #ccc; }
+        .btn-search { background: var(--sushi-red); color: white; }
+        #status { font-size: 12px; color: #666; margin-bottom: 10px; min-height: 18px; line-height: 1.4; }
+        #result-display { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; border: 2px solid var(--sushi-gold); display: none; }
+        .code-num { font-size: 36px; color: var(--sushi-red); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 3px; }
+        .copy-btn { font-size: 13px; color: #007bff; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🍣 壽司郎認證碼查詢</h2>
+    <h2>🍣 壽司郎代碼查詢</h2>
     
-    <button class="btn-update" id="updateBtn" onclick="smartFetch()">🔄 點此更新 2026 最新代碼</button>
-    <div id="status">準備就緒</div>
+    <button id="updateBtn" class="btn-update" onclick="deepScan()">🔄 深度掃描最新月份 (含跨月)</button>
+    <div id="status">建議使用前先執行深度掃描</div>
 
-    <div class="input-group">
-        <label>年份</label>
-        <select id="yearSelect"><option value="2026">2026</option><option value="2025">2025</option></select>
-    </div>
-
-    <div class="input-group">
-        <label>月份</label>
-        <select id="monthSelect">
-            <option value="1">1月</option><option value="2">2月</option><option value="3" selected>3月</option>
-            <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
-            <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
-            <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+    <div class="card">
+        <label>選擇年份</label>
+        <select id="yearSel">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+        </select>
+        <label>選擇月份</label>
+        <select id="monthSel">
+            <option value="1">1月</option><option value="2">2月</option>
+            <option value="3" selected>3月</option><option value="4">4月</option>
+            <option value="5">5月</option><option value="6">6月</option>
+            <option value="7">7月</option><option value="8">8月</option>
+            <option value="9">9月</option><option value="10">10月</option>
+            <option value="11">11月</option><option value="12">12月</option>
         </select>
     </div>
 
-    <button class="btn-search" onclick="displayResult()">🔍 立即查詢</button>
+    <button class="btn-search" onclick="doQuery()">🔍 立即查詢</button>
 
-    <div id="result-box">
-        <span id="result-title" style="font-weight: bold; color: #555;"></span>
-        <strong id="code-text">-----</strong>
-        <span class="copy-hint" onclick="copyCode()">點擊此處複製代碼</span>
-    </div>
-
-    <div class="note">
-        ※ 自動抓取標題包含「2026 台灣壽司郎」、「月份」與「認證碼」之文章。<br>
-        ※ 資料來源：backpackers4u 部落格。
+    <div id="result-display">
+        <span id="res-date" style="color: #666; font-weight: bold;"></span>
+        <span class="code-num" id="res-code">-----</span>
+        <span class="copy-btn" onclick="copyToClipboard()">點我複製代碼</span>
     </div>
 </div>
 
 <script>
-    // 初始資料庫
-    let sushiroData = {
+    // 預設資料
+    let db = {
         "2026": { "1": "88409", "2": "24618" },
-        "2025": { "12": "34652", "11": "26758", "10": "95721" }
+        "2025": { "12": "34652" }
     };
 
-    function displayResult() {
-        const y = document.getElementById('yearSelect').value;
-        const m = document.getElementById('monthSelect').value;
-        const box = document.getElementById('result-box');
-        const codeDisplay = document.getElementById('code-text');
-        const titleDisplay = document.getElementById('result-title');
-
-        if (sushiroData[y] && sushiroData[y][m]) {
-            box.style.display = 'block';
-            titleDisplay.innerText = `${y}年 ${m}月 認證碼`;
-            codeDisplay.innerText = sushiroData[y][m];
+    function doQuery() {
+        const y = document.getElementById('yearSel').value;
+        const m = document.getElementById('monthSel').value;
+        const disp = document.getElementById('result-display');
+        
+        if (db[y] && db[y][m]) {
+            disp.style.display = 'block';
+            document.getElementById('res-date').innerText = `${y} 年 ${m} 月`;
+            document.getElementById('res-code').innerText = db[y][m];
         } else {
-            alert(`目前尚無 ${y}年${m}月 的資料，請點擊更新按鈕試試！`);
+            alert("查無此月份資料，請先點擊上方「深度掃描」按鈕！");
         }
     }
 
-    function copyCode() {
-        const code = document.getElementById('code-text').innerText;
-        navigator.clipboard.writeText(code).then(() => {
-            const hint = document.querySelector('.copy-hint');
-            hint.innerText = "✅ 已複製到剪貼簿！";
-            hint.style.color = "#2e7d32";
-            setTimeout(() => { hint.innerText = "點擊此處複製代碼"; hint.style.color = "#888"; }, 2000);
+    function copyToClipboard() {
+        const text = document.getElementById('res-code').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("代碼已複製！");
         });
     }
 
-    async function smartFetch() {
+    async function deepScan() {
         const btn = document.getElementById('updateBtn');
         const status = document.getElementById('status');
         const proxy = "https://api.allorigins.win/get?url=";
         const blogUrl = "https://backpackers4u.pixnet.net/blog";
 
         btn.disabled = true;
-        status.innerText = "正在掃描部落格首頁...";
+        status.innerText = "🔍 正在搜尋部落格首頁文章...";
 
         try {
             const res = await fetch(proxy + encodeURIComponent(blogUrl));
             const data = await res.json();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data.contents, "text/html");
-            const links = doc.querySelectorAll('a');
+            const links = Array.from(doc.querySelectorAll('a'));
 
-            let targetUrl = "";
-            // 關鍵字比對：必須包含「壽司郎」且包含「認證碼」或「月份」
+            // 找出所有符合條件的文章連結，取前三篇
+            let articleUrls = [];
             for (let a of links) {
-                const text = a.innerText || "";
-                if (text.includes("壽司郎") && (text.includes("月份") || text.includes("認證碼"))) {
-                    targetUrl = a.href.includes('http') ? a.href : "https://backpackers4u.pixnet.net" + a.getAttribute('href');
-                    status.innerText = `找到目標文章：${text.substring(0, 15)}...`;
-                    break;
+                const txt = a.innerText || "";
+                if (txt.includes("壽司郎") && (txt.includes("認證碼") || txt.includes("月份"))) {
+                    const href = a.getAttribute('href');
+                    const fullUrl = href.startsWith('http') ? href : "https://backpackers4u.pixnet.net" + href;
+                    if (!articleUrls.includes(fullUrl)) articleUrls.push(fullUrl);
+                    if (articleUrls.length >= 3) break; 
                 }
             }
 
-            if (!targetUrl) throw new Error("找不到相關文章，請確認網址是否正確。");
+            if (articleUrls.length === 0) throw new Error("首頁找不到壽司郎文章");
 
-            // 第二階段：抓取內文
-            status.innerText = "正在解析最新月份代碼...";
-            const res2 = await fetch(proxy + encodeURIComponent(targetUrl));
-            const data2 = await res2.json();
-            const content = data2.contents;
+            status.innerText = `📡 發現 ${articleUrls.length} 篇相關文章，開始深度掃描內文...`;
 
-            // 抓取格式：2026 1月份 認證碼88409 或 2026年2月 12345
-            const regex = /(20\d{2})\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
-            let match;
-            let count = 0;
+            let totalFound = 0;
+            // 逐一抓取這三篇文章內容
+            for (let url of articleUrls) {
+                const subRes = await fetch(proxy + encodeURIComponent(url));
+                const subData = await subRes.json();
+                const content = subData.contents;
 
-            while ((match = regex.exec(content)) !== null) {
-                const y = match[1], m = match[2], c = match[3];
-                if (!sushiroData[y]) sushiroData[y] = {};
-                sushiroData[y][m] = c;
-                count++;
+                // 強化版 Regex：適應各種打字習慣
+                const regex = /(202[4-7])\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
+                let match;
+                while ((match = regex.exec(content)) !== null) {
+                    const y = match[1], m = match[2], c = match[3];
+                    if (!db[y]) db[y] = {};
+                    db[y][m] = c;
+                    totalFound++;
+                }
             }
 
-            if (count > 0) {
-                status.style.color = "#2e7d32";
-                status.innerText = `✅ 成功更新！共抓取到 ${count} 個月份的代碼。`;
-                displayResult();
-            } else {
-                status.innerText = "⚠ 抓取完畢，但未在文章內發現代碼格式。";
-            }
+            status.style.color = "#2e7d32";
+            status.innerText = `✅ 掃描完成！從多篇文章中整理出 ${totalFound} 筆資料。`;
+            doQuery();
 
         } catch (err) {
             status.style.color = "red";
-            status.innerText = "❌ 更新失敗，請稍後再試。";
+            status.innerText = "❌ 掃描失敗，請檢查網路或稍後再試。";
             console.error(err);
         } finally {
             btn.disabled = false;
