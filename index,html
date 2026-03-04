@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>壽司郎問卷認證碼查詢器 (支援自動更新)</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .btn-search {
+            background-color: #d32f2f;
+            color: white;
+        }
+        .btn-search:hover { background-color: #b71c1c; }
+        
+        .btn-update {
+            background-color: #1976d2;
+            color: white;
+            font-size: 16px;
+        }
+        .btn-update:hover { background-color: #1565c0; }
+        .btn-update:disabled {
+            background-color: #90caf9;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            min-height: 1.2em;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 5px;
+            border: 1px dashed #ff9800;
+            display: none;
+        }
+        
+        #statusMessage {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #2e7d32;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        .note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            text-align: left;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🍣 壽司郎認證碼查詢</h2>
+    
+    <button class="btn-update" id="updateBtn" onclick="fetchLatestData()">🔄 從網站自動抓取最新代碼</button>
+    <div id="statusMessage"></div>
+
+    <div class="input-group" style="margin-top: 15px;">
+        <label for="year">年份 (西元)</label>
+        <select id="year">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="month">月份</label>
+        <select id="month">
+            <option value="1">1月</option>
+            <option value="2">2月</option>
+            <option value="3">3月</option>
+            <option value="4">4月</option>
+            <option value="5">5月</option>
+            <option value="6">6月</option>
+            <option value="7">7月</option>
+            <option value="8">8月</option>
+            <option value="9">9月</option>
+            <option value="10">10月</option>
+            <option value="11">11月</option>
+            <option value="12">12月</option>
+        </select>
+    </div>
+
+    <button class="btn-search" onclick="findCode()">🔍 查詢序號</button>
+
+    <div id="result"></div>
+    
+    <div class="note">
+        ※ 資料來源：backpackers4u 部落格<br>
+        ※ 自動更新功能透過第三方代理取得網頁原始碼並進行文字分析。若部落格改變排版，可能會導致抓取失敗。
+    </div>
+</div>
+
+<script>
+    // 預設的本地資料庫 (作為基底)
+    const sushiroData = {
+        "2026": { "1": "88409" },
+        "2025": { "12": "34652", "11": "26758", "10": "95721", "9": "66048", "8": "88577", "7": "15453", "6": "63832", "5": "34747", "4": "95343", "3": "72125", "2": "21179", "1": "53069" },
+        "2024": { "12": "58182", "11": "64441", "10": "75313", "9": "50154", "8": "75679", "7": "74276", "6": "44050", "5": "11324", "4": "46619", "3": "47337", "2": "98989", "1": "46860" }
+    };
+
+    // 查詢序號功能
+    function findCode() {
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const resultDiv = document.getElementById('result');
+
+        if (sushiroData[year] && sushiroData[year][month]) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em;">${sushiroData[year][month]}</span>`;
+        } else {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `<span style="color:#777; font-size: 16px;">查無 ${year}年${month}月 的資料。<br>請試著點擊上方的自動更新按鈕。</span>`;
+        }
+    }
+
+    // 自動抓取最新資料功能
+    async function fetchLatestData() {
+        const btn = document.getElementById('updateBtn');
+        const statusMsg = document.getElementById('statusMessage');
+        const targetUrl = 'https://backpackers4u.pixnet.net/blog/post/221333427';
+        // 使用 AllOrigins 繞過 CORS 限制
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+        btn.disabled = true;
+        btn.innerText = "⏳ 正在前往網站抓取資料...";
+        statusMsg.style.color = "#f57c00";
+        statusMsg.innerText = "讀取中，請稍候...";
+
+        try {
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('網路回應錯誤');
+            
+            const data = await response.json();
+            const htmlContent = data.contents;
+
+            // 使用正規表達式找出文章中的年份、月份與代碼
+            // 匹配格式例如: "台灣壽司郎2026 1月份 認證碼88409" 或 "台灣壽司郎 2025年12月 34652"
+            const regex = /台灣壽司郎\s*(20\d{2})\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
+            let match;
+            let foundCount = 0;
+
+            while ((match = regex.exec(htmlContent)) !== null) {
+                const year = match[1];
+                const month = match[2];
+                const code = match[3];
+
+                if (!sushiroData[year]) {
+                    sushiroData[year] = {};
+                }
+                
+                // 寫入/覆蓋資料庫
+                sushiroData[year][month] = code;
+                foundCount++;
+                
+                // 動態增加下拉選單的年份(如果抓到了未來的新年份)
+                const yearSelect = document.getElementById('year');
+                if (!yearSelect.querySelector(`option[value="${year}"]`)) {
+                    const newOption = document.createElement('option');
+                    newOption.value = year;
+                    newOption.text = year;
+                    yearSelect.insertBefore(newOption, yearSelect.firstChild);
+                }
+            }
+
+            if (foundCount > 0) {
+                statusMsg.style.color = "#2e7d32";
+                statusMsg.innerText = `✅ 更新成功！共解析出 ${foundCount} 筆資料。`;
+                // 自動重新查詢目前選取的月份
+                findCode(); 
+            } else {
+                statusMsg.style.color = "#d32f2f";
+                statusMsg.innerText = "⚠️ 抓取成功，但沒有找到符合格式的代碼（版主可能更改了排版）。";
+            }
+
+        } catch (error) {
+            console.error("Fetch error: ", error);
+            statusMsg.style.color = "#d32f2f";
+            statusMsg.innerText = "❌ 更新失敗，可能是網路問題或代理伺服器忙碌。";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "🔄 從網站自動抓取最新代碼";
+            
+            // 3秒後清除狀態訊息
+            setTimeout(() => {
+                if(statusMsg.innerText.includes("更新成功")) {
+                    statusMsg.innerText = "";
+                }
+            }, 3000);
+        }
+    }
+    
+    // 初始化設定選單為當前時間 (2026年3月)
+    window.onload = function() {
+        const now = new Date();
+        const currentYear = now.getFullYear().toString();
+        const currentMonth = (now.getMonth() + 1).toString();
+        
+        const yearSelect = document.getElementById('year');
+        if (yearSelect.querySelector(`option[value="${currentYear}"]`)) {
+            yearSelect.value = currentYear;
+        }
+        document.getElementById('month').value = currentMonth;
+        
+        // 自動查詢一次
+        findCode();
+    }
+</script>
+
+</body>
+</html>
