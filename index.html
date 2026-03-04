@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎問卷認證碼查詢器 (支援自動更新)</title>
+    <title>壽司郎問卷認證碼查詢器 (智能追蹤版)</title>
     <style>
         body {
             font-family: "Microsoft JhengHei", Arial, sans-serif;
@@ -88,10 +88,11 @@
         
         #statusMessage {
             margin-top: 10px;
-            font-size: 14px;
+            font-size: 13px;
             color: #2e7d32;
             font-weight: bold;
-            min-height: 20px;
+            min-height: 35px;
+            line-height: 1.4;
         }
 
         .note {
@@ -108,17 +109,16 @@
 <div class="container">
     <h2>🍣 壽司郎認證碼查詢</h2>
     
-    <button class="btn-update" id="updateBtn" onclick="fetchLatestData()">🔄 從網站自動抓取最新代碼</button>
+    <button class="btn-update" id="updateBtn" onclick="fetchLatestData()">🔄 自動尋找並更新最新代碼</button>
     <div id="statusMessage"></div>
 
-    <div class="input-group" style="margin-top: 15px;">
+    <div class="input-group" style="margin-top: 10px;">
         <label for="year">年份 (西元)</label>
         <select id="year">
             <option value="2026">2026</option>
             <option value="2025">2025</option>
             <option value="2024">2024</option>
             <option value="2023">2023</option>
-            <option value="2022">2022</option>
         </select>
     </div>
 
@@ -145,8 +145,8 @@
     <div id="result"></div>
     
     <div class="note">
-        ※ 資料來源：backpackers4u 部落格<br>
-        ※ 自動更新功能透過第三方代理取得網頁原始碼並進行文字分析。若部落格改變排版，可能會導致抓取失敗。
+        ※ 資料來源：backpackers4u 部落格首頁<br>
+        ※ 系統會自動前往該部落格首頁尋找最新的壽司郎文章，並解析內文以取得最新代碼。
     </div>
 </div>
 
@@ -169,32 +169,62 @@
             resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em;">${sushiroData[year][month]}</span>`;
         } else {
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `<span style="color:#777; font-size: 16px;">查無 ${year}年${month}月 的資料。<br>請試著點擊上方的自動更新按鈕。</span>`;
+            resultDiv.innerHTML = `<span style="color:#777; font-size: 16px;">查無 ${year}年${month}月 的資料。<br>請點擊上方的「自動更新」按鈕抓取。</span>`;
         }
     }
 
-    // 自動抓取最新資料功能
+    // 自動抓取最新資料功能 (兩階段抓取)
     async function fetchLatestData() {
         const btn = document.getElementById('updateBtn');
         const statusMsg = document.getElementById('statusMessage');
-        const targetUrl = 'https://backpackers4u.pixnet.net/blog/post/221333427';
-        // 使用 AllOrigins 繞過 CORS 限制
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
+        const blogHomeUrl = 'https://backpackers4u.pixnet.net/blog';
+        
         btn.disabled = true;
-        btn.innerText = "⏳ 正在前往網站抓取資料...";
+        btn.innerText = "⏳ 執行中，請稍候...";
         statusMsg.style.color = "#f57c00";
-        statusMsg.innerText = "讀取中，請稍候...";
 
         try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error('網路回應錯誤');
+            // 【第一階段】：去部落格首頁尋找最新的文章連結
+            statusMsg.innerText = "正在掃描部落格首頁，尋找最新文章...";
+            const proxyHomeUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(blogHomeUrl)}`;
+            const homeResponse = await fetch(proxyHomeUrl);
+            if (!homeResponse.ok) throw new Error('首頁讀取失敗');
             
-            const data = await response.json();
-            const htmlContent = data.contents;
+            const homeData = await homeResponse.json();
+            
+            // 將字串轉為 HTML DOM 方便搜尋
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(homeData.contents, 'text/html');
+            const links = doc.querySelectorAll('a');
+            
+            let targetArticleUrl = '';
+            
+            // 尋找包含「壽司郎」字眼的連結
+            for (let a of links) {
+                if (a.textContent.includes('壽司郎') && a.getAttribute('href') && a.getAttribute('href').includes('/blog/post/')) {
+                    const href = a.getAttribute('href');
+                    targetArticleUrl = href.startsWith('http') ? href : 'https://backpackers4u.pixnet.net' + href;
+                    break; // 找到第一篇(最新的)就跳出
+                }
+            }
 
-            // 使用正規表達式找出文章中的年份、月份與代碼
-            // 匹配格式例如: "台灣壽司郎2026 1月份 認證碼88409" 或 "台灣壽司郎 2025年12月 34652"
+            // 如果首頁找不到，就退回使用已知的文章網址
+            if (!targetArticleUrl) {
+                statusMsg.innerText = "首頁找不到新文章，嘗試讀取原文章...";
+                targetArticleUrl = 'https://backpackers4u.pixnet.net/blog/post/221333427';
+            } else {
+                statusMsg.innerText = "找到最新文章！正在解析代碼內容...";
+            }
+
+            // 【第二階段】：去找到的那篇文章裡面抓取代碼
+            const proxyArticleUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetArticleUrl)}`;
+            const articleResponse = await fetch(proxyArticleUrl);
+            if (!articleResponse.ok) throw new Error('文章內容讀取失敗');
+            
+            const articleData = await articleResponse.json();
+            const htmlContent = articleData.contents;
+
+            // 正規表達式：找出「台灣壽司郎 20xx年 x月 認證碼 xxxxx」的格式
             const regex = /台灣壽司郎\s*(20\d{2})\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
             let match;
             let foundCount = 0;
@@ -208,11 +238,10 @@
                     sushiroData[year] = {};
                 }
                 
-                // 寫入/覆蓋資料庫
                 sushiroData[year][month] = code;
                 foundCount++;
                 
-                // 動態增加下拉選單的年份(如果抓到了未來的新年份)
+                // 動態增加下拉選單的年份
                 const yearSelect = document.getElementById('year');
                 if (!yearSelect.querySelector(`option[value="${year}"]`)) {
                     const newOption = document.createElement('option');
@@ -224,32 +253,30 @@
 
             if (foundCount > 0) {
                 statusMsg.style.color = "#2e7d32";
-                statusMsg.innerText = `✅ 更新成功！共解析出 ${foundCount} 筆資料。`;
-                // 自動重新查詢目前選取的月份
-                findCode(); 
+                statusMsg.innerText = `✅ 更新成功！共從最新文章解析出 ${foundCount} 筆代碼資料。`;
+                findCode(); // 自動重新查詢
             } else {
                 statusMsg.style.color = "#d32f2f";
-                statusMsg.innerText = "⚠️ 抓取成功，但沒有找到符合格式的代碼（版主可能更改了排版）。";
+                statusMsg.innerText = "⚠️ 抓取成功，但文章內沒有找到符合格式的代碼。";
             }
 
         } catch (error) {
             console.error("Fetch error: ", error);
             statusMsg.style.color = "#d32f2f";
-            statusMsg.innerText = "❌ 更新失敗，可能是網路問題或代理伺服器忙碌。";
+            statusMsg.innerText = "❌ 更新失敗，可能是網路問題或代理伺服器忙碌，請稍後再試。";
         } finally {
             btn.disabled = false;
-            btn.innerText = "🔄 從網站自動抓取最新代碼";
+            btn.innerText = "🔄 自動尋找並更新最新代碼";
             
-            // 3秒後清除狀態訊息
             setTimeout(() => {
                 if(statusMsg.innerText.includes("更新成功")) {
                     statusMsg.innerText = "";
                 }
-            }, 3000);
+            }, 5000);
         }
     }
     
-    // 初始化設定選單為當前時間 (2026年3月)
+    // 初始化設定選單為當前時間
     window.onload = function() {
         const now = new Date();
         const currentYear = now.getFullYear().toString();
@@ -261,7 +288,6 @@
         }
         document.getElementById('month').value = currentMonth;
         
-        // 自動查詢一次
         findCode();
     }
 </script>
