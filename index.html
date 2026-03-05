@@ -3,43 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎認證碼 - 終極破解版</title>
+    <title>壽司郎認證碼 - 純文字直取版</title>
     <style>
-        :root { --sushi: #e63946; --blue: #457b9d; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); width: 100%; max-width: 400px; text-align: center; }
-        h2 { color: var(--sushi); border-bottom: 2px solid var(--sushi); padding-bottom: 10px; margin-top: 0; }
-        .status { font-size: 14px; color: #555; margin: 10px 0; padding: 12px; background: #eee; border-radius: 8px; min-height: 24px; font-weight: bold; }
-        textarea { width: 100%; height: 80px; margin-top: 10px; border: 2px solid #ddd; border-radius: 8px; padding: 10px; box-sizing: border-box; font-family: inherit; }
-        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; font-weight: bold; }
-        .btn-auto { background: var(--blue); color: white; border: none; cursor: pointer; }
-        .btn-auto:hover { background: #1d3557; }
-        .btn-manual { background: #6c757d; color: white; border: none; cursor: pointer; }
-        .btn-search { background: var(--sushi); color: white; border: none; cursor: pointer; margin-top: 15px; font-size: 18px; }
+        :root { --sushi: #e63946; --dark: #333; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #e9ecef; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
+        h2 { color: var(--sushi); border-bottom: 3px solid var(--sushi); padding-bottom: 8px; margin-top: 0; }
+        .status { font-size: 14px; color: #555; margin: 15px 0; padding: 12px; background: #f8f9fa; border-left: 4px solid #adb5bd; border-radius: 4px; font-weight: bold; text-align: left; }
+        textarea { width: 100%; height: 80px; margin-top: 10px; border: 1px solid #ced4da; border-radius: 6px; padding: 10px; box-sizing: border-box; }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: none; font-size: 16px; font-weight: bold; }
+        select { border: 1px solid #ced4da; background: white; }
+        .btn-auto { background: #212529; color: white; cursor: pointer; }
+        .btn-auto:hover { background: #343a40; }
+        .btn-manual { background: #6c757d; color: white; cursor: pointer; }
+        .btn-search { background: var(--sushi); color: white; cursor: pointer; margin-top: 15px; font-size: 18px; }
         .btn-search:hover { background: #c1121f; }
         #result-box { margin-top: 20px; padding: 20px; border: 2px dashed #ffb703; border-radius: 10px; background: #fffcf2; display: none; }
         .code-val { font-size: 46px; color: var(--sushi); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 5px; }
+        .hint-text { font-size: 12px; color: #6c757d; text-align: left; margin-top: 5px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🍣 壽司郎代碼終極工具</h2>
+    <h2>🍣 壽司郎認證碼直取工具</h2>
     
-    <div class="status" id="status">💡 準備就緒</div>
+    <div class="status" id="status">💡 提示：點擊下方按鈕啟動純文字解析</div>
 
-    <button class="btn-auto" id="autoBtn" onclick="fetchRSS()">🔄 1. 自動破解更新 (推薦)</button>
+    <button class="btn-auto" id="autoBtn" onclick="fetchPlainText()">🚀 1. 啟動純文字解析抓取 (最新解法)</button>
 
     <div style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-        <label style="font-size: 13px; color: #555; font-weight: bold;">備用方案：若自動更新失敗，請複製文章標題或內文貼在下方</label>
-        <textarea id="manualInput" placeholder="例如：【2026 台灣壽司郎】3月份填問卷20元... 認證碼 88409"></textarea>
-        <button class="btn-manual" onclick="parseManual()">⚡ 2. 手動強制解析</button>
+        <label style="font-size: 13px; color: #495057; font-weight: bold;">備用：若解析遭擋，請將文章文字貼在此處</label>
+        <textarea id="manualInput" placeholder="直接全選文章複製貼上即可..."></textarea>
+        <button class="btn-manual" onclick="parseManual()">⚡ 2. 本地強制解析</button>
     </div>
 
-    <hr style="margin: 20px 0; border: 0.5px solid #ddd;">
+    <hr style="margin: 20px 0; border: 0.5px solid #dee2e6;">
 
     <div style="text-align: left;">
-        <label style="font-weight: bold;">選擇查詢月份：</label>
+        <label style="font-weight: bold; color: #495057;">選擇查詢月份：</label>
         <select id="mSel" onchange="checkCode()">
             <option value="1">1月</option><option value="2">2月</option>
             <option value="3" selected>3月</option><option value="4">4月</option>
@@ -53,115 +55,94 @@
     <button class="btn-search" onclick="checkCode(true)">🔍 3. 顯示代碼</button>
 
     <div id="result-box">
-        <div id="res-title" style="font-weight:bold; color:#666;"></div>
+        <div id="res-title" style="font-weight:bold; color:#6c757d;"></div>
         <span class="code-val" id="res-code">-----</span>
         <div style="font-size: 14px; color: #0077b6; cursor: pointer; text-decoration: underline;" onclick="copyResult()">點此複製序號</div>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('sushi_final_db')) || {};
+    let db = JSON.parse(localStorage.getItem('sushi_text_db')) || {};
 
-    // ★ 超寬鬆解析引擎 ★
+    // 寬鬆解析引擎 (支援跨行與 Markdown 語法)
     function extractSuper(text) {
-        // 1. 找年份 (預設 2026，若文字中有 202x 則替換)
         let currentYear = "2026";
         let yMatch = text.match(/202[4-7]/);
         if (yMatch) currentYear = yMatch[0];
 
-        // 2. 找代碼：尋找「1~12月」，且在接下來的 80 個字元內，出現「獨立的5位數字」
-        // [s] flag 讓 . 可以匹配換行符號
+        // 找尋 X月 與其後方 80 個字元內的 5 位獨立數字
         const regex = /(\d{1,2})\s*月.{0,80}?(?<!\d)(\d{5})(?!\d)/gs;
         
         let match;
         let count = 0;
         while ((match = regex.exec(text)) !== null) {
-            const m = match[1];
-            const c = match[2];
+            const m = match[1], c = match[2];
             if (!db[currentYear]) db[currentYear] = {};
             db[currentYear][m] = c;
             count++;
         }
 
         if (count > 0) {
-            localStorage.setItem('sushi_final_db', JSON.stringify(db));
+            localStorage.setItem('sushi_text_db', JSON.stringify(db));
         }
         return count;
     }
 
-    // 手動解析觸發
-    function parseManual() {
-        const input = document.getElementById('manualInput').value;
-        if (!input.trim()) {
-            alert("請先貼上文字！"); return;
-        }
-        const count = extractSuper(input);
-        if (count > 0) {
-            document.getElementById('status').innerText = `✅ 手動解析成功！抓到 ${count} 筆。`;
-            document.getElementById('status').style.color = "green";
-            document.getElementById('manualInput').value = "";
-            checkCode(true);
-        } else {
-            alert("抱歉，這段文字裡沒有找到「X月」和「5位數代碼」的組合。");
-        }
-    }
-
-    // 自動抓取 RSS 觸發
-    async function fetchRSS() {
+    // AI 純文字解析請求
+    async function fetchPlainText() {
         const btn = document.getElementById('autoBtn');
         const status = document.getElementById('status');
         
         btn.disabled = true;
-        status.style.color = "#f57c00";
-        status.innerText = "⏳ 正在透過 RSS 無痕讀取部落格...";
+        status.style.borderLeftColor = "#f57c00";
+        status.innerText = "⏳ 正在透過純文字引擎剝離網頁...";
 
-        // 改抓痞客邦的 RSS 訂閱源 (XML 格式，通常不擋機器人)
-        const rssUrl = "https://backpackers4u.pixnet.net/blog/feed/rss";
-        const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(rssUrl);
+        // 呼叫 Jina Reader API，它會將任何網址轉為純文字 (類似以前的 Google 頁庫存檔)
+        const targetUrl = "https://backpackers4u.pixnet.net/blog";
+        const readerApi = "https://r.jina.ai/" + targetUrl;
 
         try {
-            const res = await fetch(proxyUrl);
-            const data = await res.json();
-            const xmlText = data.contents;
+            const res = await fetch(readerApi);
+            if (!res.ok) throw new Error("API 回應錯誤");
             
-            // 解析 XML
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            const items = xmlDoc.querySelectorAll("item");
-            
-            let allText = "";
-            // 把最新的文章標題和內文全部串起來
-            items.forEach(item => {
-                const title = item.querySelector("title")?.textContent || "";
-                const desc = item.querySelector("description")?.textContent || "";
-                allText += title + " " + desc + " \n";
-            });
-
-            const count = extractSuper(allText);
+            const plainText = await res.text();
+            const count = extractSuper(plainText);
 
             if (count > 0) {
-                status.style.color = "#2e7d32";
-                status.innerText = `✅ 破解成功！自動從最新文章抓到 ${count} 筆資料。`;
+                status.style.borderLeftColor = "#2e7d32";
+                status.innerText = `✅ 剝離成功！自動抓取到 ${count} 筆資料。`;
                 checkCode(true);
             } else {
-                status.style.color = "#d32f2f";
-                status.innerText = "⚠ 讀取成功，但 RSS 內未發現代碼，請使用手動解析。";
+                status.style.borderLeftColor = "#d32f2f";
+                status.innerText = "⚠ 讀取成功，但純文字內找不到代碼格式，可能是標題未更新。";
             }
         } catch (err) {
             console.error(err);
-            status.style.color = "red";
-            status.innerText = "❌ 網路連線失敗，請直接使用下方的「手動解析」。";
+            status.style.borderLeftColor = "#d32f2f";
+            status.innerText = "❌ 解析引擎遭到阻擋，請直接使用下方的「本地強制解析」。";
         } finally {
             btn.disabled = false;
         }
     }
 
-    // 顯示結果
+    function parseManual() {
+        const input = document.getElementById('manualInput').value;
+        if (!input.trim()) { alert("請先貼上文字！"); return; }
+        const count = extractSuper(input);
+        if (count > 0) {
+            const status = document.getElementById('status');
+            status.innerText = `✅ 本地解析成功！抓到 ${count} 筆。`;
+            status.style.borderLeftColor = "#2e7d32";
+            document.getElementById('manualInput').value = "";
+            checkCode(true);
+        } else {
+            alert("抱歉，這段文字裡沒有找到「X月」和「5位數代碼」。");
+        }
+    }
+
     function checkCode(showAlert = false) {
         const m = document.getElementById('mSel').value;
         const resBox = document.getElementById('result-box');
-        
-        // 自動找出最新年份
         let latestYear = Object.keys(db).sort().pop() || "2026";
 
         if (db[latestYear] && db[latestYear][m]) {
@@ -170,7 +151,7 @@
             document.getElementById('res-code').innerText = db[latestYear][m];
         } else {
             resBox.style.display = 'none';
-            if (showAlert) alert(`目前尚未抓到 ${m} 月的代碼哦！\n請嘗試點擊「自動破解更新」，或手動複製文章來解析。`);
+            if (showAlert) alert(`目前尚未抓到 ${m} 月的代碼哦！`);
         }
     }
 
@@ -179,12 +160,11 @@
         alert("代碼已複製！");
     }
 
-    // 初始載入
     window.onload = () => {
         const m = new Date().getMonth() + 1;
         document.getElementById('mSel').value = m;
         if (Object.keys(db).length > 0) {
-            document.getElementById('status').innerText = "💡 已載入上次記憶的代碼";
+            document.getElementById('status').innerText = "💡 已載入上次記憶的代碼，可直接查詢";
             checkCode();
         }
     };
