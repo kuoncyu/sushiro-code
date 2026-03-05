@@ -3,44 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎認證碼 - 終極穩定版</title>
+    <title>壽司郎認證碼 - 雙模強效版</title>
     <style>
-        :root { --main-red: #e63946; --bg-color: #f1faee; }
-        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; max-width: 420px; text-align: center; }
-        h1 { color: var(--main-red); font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid var(--main-red); padding-bottom: 10px;}
-        .status-box { background: #eee; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; color: #555; min-height: 40px; display: flex; align-items: center; justify-content: center; }
-        .selector-group { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
-        label { font-weight: bold; color: #333; font-size: 14px; }
-        select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-update { background: #457b9d; color: white; margin-bottom: 10px; }
-        .btn-update:hover { background: #1d3557; }
-        .btn-update:disabled { background: #ccc; cursor: wait; }
-        .btn-search { background: var(--main-red); color: white; }
-        .btn-search:hover { background: #c1121f; }
-        #result { margin-top: 20px; padding: 20px; border: 2px solid #ffb703; border-radius: 10px; background: #fffcf2; display: none; }
-        .code { font-size: 42px; color: var(--main-red); font-weight: bold; letter-spacing: 4px; margin: 10px 0; display: block; }
-        .copy-hint { font-size: 12px; color: #0077b6; cursor: pointer; text-decoration: underline; }
+        :root { --sushi: #e63946; --blue: #457b9d; }
+        body { font-family: sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: var(--sushi); border-bottom: 2px solid var(--sushi); padding-bottom: 10px; }
+        .status { font-size: 13px; color: #666; margin: 10px 0; padding: 10px; background: #eee; border-radius: 5px; min-height: 20px; }
+        .tab-btn { padding: 8px 15px; cursor: pointer; border: none; background: #ddd; margin: 5px; border-radius: 5px; font-weight: bold; }
+        .tab-btn.active { background: var(--blue); color: white; }
+        .panel { display: none; margin-top: 15px; }
+        .panel.active { display: block; }
+        textarea { width: 100%; height: 80px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; padding: 10px; box-sizing: border-box; }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; }
+        button { background: var(--sushi); color: white; font-weight: bold; border: none; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #result-box { margin-top: 20px; padding: 20px; border: 2px dashed #ffb703; border-radius: 10px; background: #fffcf2; display: none; }
+        .code-val { font-size: 40px; color: var(--sushi); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 5px; }
+        .blog-link { display: block; margin-top: 10px; color: var(--blue); font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🍣 壽司郎認證碼查詢</h1>
+    <h2>🍣 壽司郎代碼工具</h2>
     
-    <div class="status-box" id="status">首次使用請先點擊下方更新</div>
-    
-    <button id="updateBtn" class="btn-update" onclick="fetchAllCodes()">🔄 深度同步部落格資料</button>
+    <div class="status" id="status">模式：自動掃描</div>
 
-    <div class="selector-group">
-        <label>年份</label>
-        <select id="ySelect">
-            <option value="2026">2026</option>
-            <option value="2025">2025</option>
-        </select>
-        <label>月份</label>
-        <select id="mSelect">
+    <div style="margin-bottom: 15px;">
+        <button class="tab-btn active" onclick="switchTab('auto', this)">自動掃描</button>
+        <button class="tab-btn" onclick="switchTab('manual', this)">手動解析</button>
+    </div>
+
+    <div id="auto-panel" class="panel active">
+        <button id="updateBtn" onclick="tryUpdate()">🔄 嘗試自動更新 (多重代理)</button>
+        <a href="https://backpackers4u.pixnet.net/blog" target="_blank" class="blog-link">🔗 若失敗，請點此手動打開部落格</a>
+    </div>
+
+    <div id="manual-panel" class="panel">
+        <p style="font-size: 13px; color: #555;">請複製部落格內文，直接貼在下方：</p>
+        <textarea id="manualInput" placeholder="在此貼上複製的文字..."></textarea>
+        <button onclick="parseManual()">⚡ 立即解析代碼</button>
+    </div>
+
+    <hr style="margin: 20px 0; border: 0.5px solid #eee;">
+
+    <div style="text-align: left;">
+        <label style="font-weight: bold;">選擇月份：</label>
+        <select id="mSel" onchange="checkCode()">
             <option value="1">1月</option><option value="2">2月</option>
             <option value="3" selected>3月</option><option value="4">4月</option>
             <option value="5">5月</option><option value="6">6月</option>
@@ -50,125 +60,126 @@
         </select>
     </div>
 
-    <button class="btn-search" onclick="showCode()">🔍 查詢結果</button>
-
-    <div id="result">
+    <div id="result-box">
         <div id="res-title" style="font-weight:bold; color:#666;"></div>
-        <span class="code" id="res-code">-----</span>
-        <div class="copy-hint" onclick="copyCode()">點此複製序號</div>
+        <span class="code-val" id="res-code">-----</span>
+        <div style="font-size: 12px; color: #0077b6; cursor: pointer;" onclick="copyResult()">點擊複製序號</div>
     </div>
 </div>
 
 <script>
-    // 優先從記憶體讀取，否則空物件
-    let sushiroDB = JSON.parse(localStorage.getItem('sushiro_v3')) || {};
+    let db = JSON.parse(localStorage.getItem('sushi_db')) || {};
 
-    // 顯示結果
-    function showCode() {
-        const y = document.getElementById('ySelect').value;
-        const m = document.getElementById('mSelect').value;
-        const resDiv = document.getElementById('result');
-        const codeSpan = document.getElementById('res-code');
-        const titleDiv = document.getElementById('res-title');
+    function switchTab(mode, btn) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(mode + '-panel').classList.add('active');
+        btn.classList.add('active');
+        document.getElementById('status').innerText = "模式：" + (mode === 'auto' ? "自動掃描" : "手動解析");
+    }
 
-        if (sushiroDB[y] && sushiroDB[y][m]) {
-            resDiv.style.display = 'block';
-            titleDiv.innerText = `${y}年 ${m}月 認證碼`;
-            codeSpan.innerText = sushiroDB[y][m];
+    // 萬能解析引擎
+    function extractData(text) {
+        const regex = /(202[4-7])\s*年?\s*(\d{1,2})\s*月[份]?.*?(\d{5})/g;
+        let match;
+        let count = 0;
+        while ((match = regex.exec(text)) !== null) {
+            const y = match[1], m = match[2], c = match[3];
+            if (!db[y]) db[y] = {};
+            db[y][m] = c;
+            count++;
+        }
+        if (count > 0) {
+            localStorage.setItem('sushi_db', JSON.stringify(db));
+            checkCode();
+        }
+        return count;
+    }
+
+    function parseManual() {
+        const input = document.getElementById('manualInput').value;
+        const count = extractData(input);
+        if (count > 0) {
+            alert(`解析成功！新增 ${count} 筆代碼。`);
+            document.getElementById('manualInput').value = "";
         } else {
-            alert(`找不到 ${y}年${m}月 的資料，請點擊更新按鈕再試一次！`);
+            alert("在文字中找不到符合格式的代碼 (例如：2026年3月 12345)");
         }
     }
 
-    // 複製功能
-    function copyCode() {
-        const c = document.getElementById('res-code').innerText;
-        navigator.clipboard.writeText(c).then(() => {
-            alert("代碼已複製到剪貼簿！");
-        });
+    function checkCode() {
+        const m = document.getElementById('mSel').value;
+        const y = "2026"; 
+        const resBox = document.getElementById('result-box');
+        if (db[y] && db[y][m]) {
+            resBox.style.display = 'block';
+            document.getElementById('res-title').innerText = `${y}年 ${m}月 序號`;
+            document.getElementById('res-code').innerText = db[y][m];
+        } else {
+            resBox.style.display = 'none';
+        }
     }
 
-    // 主更新程式
-    async function fetchAllCodes() {
-        const btn = document.getElementById('updateBtn');
+    // 多重 Proxy 嘗試
+    async function tryUpdate() {
         const status = document.getElementById('status');
+        const btn = document.getElementById('updateBtn');
+        const proxies = [
+            "https://api.allorigins.win/get?url=",
+            "https://corsproxy.io/?",
+            "https://thingproxy.freeboard.io/fetch/"
+        ];
         
-        // 換用另一個 Proxy 增加穩定度
-        const proxyPrefix = "https://api.allorigins.win/get?url=";
-        const blogHome = "https://backpackers4u.pixnet.net/blog";
-
         btn.disabled = true;
-        status.innerText = "⏳ 正在連線至部落格首頁...";
+        let success = false;
 
-        try {
-            // 1. 抓取首頁
-            const homeRes = await fetch(proxyPrefix + encodeURIComponent(blogHome));
-            const homeJson = await homeRes.json();
-            const doc = new DOMParser().parseFromString(homeJson.contents, "text/html");
-            const allLinks = Array.from(doc.querySelectorAll('a'));
-
-            // 2. 篩選出最相關的「兩篇」文章 (通常就是這個月跟上個月)
-            let urls = [];
-            for (let a of allLinks) {
-                const text = a.innerText || "";
-                const href = a.getAttribute('href') || "";
-                if (text.includes("壽司郎") && href.includes("/post/")) {
-                    const fullUrl = href.startsWith('http') ? href : "https://backpackers4u.pixnet.net" + href;
-                    if (!urls.includes(fullUrl)) urls.push(fullUrl);
+        for (let i = 0; i < proxies.length; i++) {
+            status.innerText = `⏳ 正在嘗試連線方案 ${i+1}...`;
+            try {
+                const target = encodeURIComponent("https://backpackers4u.pixnet.net/blog");
+                const res = await fetch(proxies[i] + (i === 1 ? target : encodeURIComponent("https://backpackers4u.pixnet.net/blog")));
+                const data = await res.json();
+                const html = data.contents || data; // 不同 proxy 回傳格式不同
+                
+                // 這裡簡化邏輯：直接從首頁初步抓取一次，並尋找文章網址
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const links = Array.from(doc.querySelectorAll('a'))
+                    .map(a => a.href)
+                    .filter(href => href && href.includes('/post/'));
+                
+                if (links.length > 0) {
+                    // 抓取最新一篇
+                    status.innerText = `📄 已連線，正在解析內文...`;
+                    const artRes = await fetch(proxies[i] + encodeURIComponent(links[0]));
+                    const artData = await artRes.json();
+                    const count = extractData(artData.contents || artData);
+                    if (count > 0) {
+                        status.innerText = `✅ 更新成功！(方案 ${i+1})`;
+                        success = true;
+                        break;
+                    }
                 }
-                if (urls.length >= 2) break;
+            } catch (e) {
+                console.log(`方案 ${i+1} 失敗`);
             }
-
-            if (urls.length === 0) throw new Error("找不到相關文章連結");
-
-            status.innerText = `📡 發現文章，深度掃描內容中...`;
-            let foundCount = 0;
-
-            // 3. 遍歷文章內容
-            for (let i = 0; i < urls.length; i++) {
-                status.innerText = `📄 掃描第 ${i+1}/${urls.length} 篇文章...`;
-                const artRes = await fetch(proxyPrefix + encodeURIComponent(urls[i]));
-                const artJson = await artRes.json();
-                const content = artJson.contents;
-
-                // 4. 強力正則表達式：抓取 (202x) + (1-12月) + (5位數字)
-                // 這個正則可以應對「3月：88409」或「3月份認證碼88409」
-                const regex = /(202\d)\s*年?\s*(\d{1,2})\s*月[份]?.*?(\d{5})/g;
-                let m;
-                while ((m = regex.exec(content)) !== null) {
-                    const year = m[1];
-                    const month = m[2];
-                    const code = m[3];
-                    if (!sushiroDB[year]) sushiroDB[year] = {};
-                    sushiroDB[year][month] = code;
-                    foundCount++;
-                }
-            }
-
-            if (foundCount > 0) {
-                localStorage.setItem('sushiro_v3', JSON.stringify(sushiroDB));
-                status.style.color = "green";
-                status.innerText = `✅ 更新成功！已儲存 ${foundCount} 筆代碼。`;
-                showCode();
-            } else {
-                status.innerText = "⚠ 讀取成功但找不到代碼格式，可能是部落客改變了寫法。";
-            }
-
-        } catch (err) {
-            console.error(err);
-            status.style.color = "red";
-            status.innerText = "❌ 讀取失敗：代理伺服器忙碌中，請間隔 10 秒後再點一次。";
-        } finally {
-            btn.disabled = false;
         }
+
+        if (!success) {
+            status.innerText = "❌ 自動掃描失敗，請改用「手動解析」。";
+            status.style.color = "red";
+        } else {
+            status.style.color = "green";
+        }
+        btn.disabled = false;
     }
 
-    // 初始化顯示
-    window.onload = () => {
-        if (Object.keys(sushiroDB).length > 0) {
-            status.innerText = "💡 已從本地快取載入上次更新資料";
-        }
-    };
+    function copyResult() {
+        navigator.clipboard.writeText(document.getElementById('res-code').innerText);
+        alert("已複製！");
+    }
+
+    window.onload = checkCode;
 </script>
 
 </body>
