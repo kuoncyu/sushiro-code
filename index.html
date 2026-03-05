@@ -3,171 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎認證碼 - 純文字直取版</title>
+    <title>壽司郎問卷認證碼查詢器</title>
     <style>
-        :root { --sushi: #e63946; --dark: #333; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: #e9ecef; display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
-        h2 { color: var(--sushi); border-bottom: 3px solid var(--sushi); padding-bottom: 8px; margin-top: 0; }
-        .status { font-size: 14px; color: #555; margin: 15px 0; padding: 12px; background: #f8f9fa; border-left: 4px solid #adb5bd; border-radius: 4px; font-weight: bold; text-align: left; }
-        textarea { width: 100%; height: 80px; margin-top: 10px; border: 1px solid #ced4da; border-radius: 6px; padding: 10px; box-sizing: border-box; }
-        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: none; font-size: 16px; font-weight: bold; }
-        select { border: 1px solid #ced4da; background: white; }
-        .btn-auto { background: #212529; color: white; cursor: pointer; }
-        .btn-auto:hover { background: #343a40; }
-        .btn-manual { background: #6c757d; color: white; cursor: pointer; }
-        .btn-search { background: var(--sushi); color: white; cursor: pointer; margin-top: 15px; font-size: 18px; }
-        .btn-search:hover { background: #c1121f; }
-        #result-box { margin-top: 20px; padding: 20px; border: 2px dashed #ffb703; border-radius: 10px; background: #fffcf2; display: none; }
-        .code-val { font-size: 46px; color: var(--sushi); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 5px; }
-        .hint-text { font-size: 12px; color: #6c757d; text-align: left; margin-top: 5px;}
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box; /* 確保 padding 不會撐大寬度 */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            min-height: 1.2em;
+            padding: 10px;
+            background: #fff3e0;
+            border-radius: 5px;
+            border: 1px dashed #ff9800;
+            display: none; /* 預設隱藏 */
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🍣 壽司郎認證碼直取工具</h2>
+    <h2>🍣 壽司郎認證碼查詢</h2>
     
-    <div class="status" id="status">💡 提示：點擊下方按鈕啟動純文字解析</div>
-
-    <button class="btn-auto" id="autoBtn" onclick="fetchPlainText()">🚀 1. 啟動純文字解析抓取 (最新解法)</button>
-
-    <div style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-        <label style="font-size: 13px; color: #495057; font-weight: bold;">備用：若解析遭擋，請將文章文字貼在此處</label>
-        <textarea id="manualInput" placeholder="直接全選文章複製貼上即可..."></textarea>
-        <button class="btn-manual" onclick="parseManual()">⚡ 2. 本地強制解析</button>
-    </div>
-
-    <hr style="margin: 20px 0; border: 0.5px solid #dee2e6;">
-
-    <div style="text-align: left;">
-        <label style="font-weight: bold; color: #495057;">選擇查詢月份：</label>
-        <select id="mSel" onchange="checkCode()">
-            <option value="1">1月</option><option value="2">2月</option>
-            <option value="3" selected>3月</option><option value="4">4月</option>
-            <option value="5">5月</option><option value="6">6月</option>
-            <option value="7">7月</option><option value="8">8月</option>
-            <option value="9">9月</option><option value="10">10月</option>
-            <option value="11">11月</option><option value="12">12月</option>
+    <div class="input-group">
+        <label for="year">年份 (西元)</label>
+        <select id="year">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
         </select>
     </div>
 
-    <button class="btn-search" onclick="checkCode(true)">🔍 3. 顯示代碼</button>
+    <div class="input-group">
+        <label for="month">月份</label>
+        <select id="month">
+            <option value="1">1月</option>
+            <option value="2">2月</option>
+            <option value="3">3月</option>
+            <option value="4">4月</option>
+            <option value="5">5月</option>
+            <option value="6">6月</option>
+            <option value="7">7月</option>
+            <option value="8">8月</option>
+            <option value="9">9月</option>
+            <option value="10">10月</option>
+            <option value="11">11月</option>
+            <option value="12">12月</option>
+        </select>
+    </div>
 
-    <div id="result-box">
-        <div id="res-title" style="font-weight:bold; color:#6c757d;"></div>
-        <span class="code-val" id="res-code">-----</span>
-        <div style="font-size: 14px; color: #0077b6; cursor: pointer; text-decoration: underline;" onclick="copyResult()">點此複製序號</div>
+    <button onclick="findCode()">查詢序號</button>
+
+    <div id="result"></div>
+    
+    <div class="note">
+        ※ 資料來源：backpackers4u<br>
+        ※ 認證碼為該月份通用，不分日期。<br>
+        ※ 若查無資料，代表該月份尚未更新。
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('sushi_text_db')) || {};
-
-    // 寬鬆解析引擎 (支援跨行與 Markdown 語法)
-    function extractSuper(text) {
-        let currentYear = "2026";
-        let yMatch = text.match(/202[4-7]/);
-        if (yMatch) currentYear = yMatch[0];
-
-        // 找尋 X月 與其後方 80 個字元內的 5 位獨立數字
-        const regex = /(\d{1,2})\s*月.{0,80}?(?<!\d)(\d{5})(?!\d)/gs;
-        
-        let match;
-        let count = 0;
-        while ((match = regex.exec(text)) !== null) {
-            const m = match[1], c = match[2];
-            if (!db[currentYear]) db[currentYear] = {};
-            db[currentYear][m] = c;
-            count++;
-        }
-
-        if (count > 0) {
-            localStorage.setItem('sushi_text_db', JSON.stringify(db));
-        }
-        return count;
-    }
-
-    // AI 純文字解析請求
-    async function fetchPlainText() {
-        const btn = document.getElementById('autoBtn');
-        const status = document.getElementById('status');
-        
-        btn.disabled = true;
-        status.style.borderLeftColor = "#f57c00";
-        status.innerText = "⏳ 正在透過純文字引擎剝離網頁...";
-
-        // 呼叫 Jina Reader API，它會將任何網址轉為純文字 (類似以前的 Google 頁庫存檔)
-        const targetUrl = "https://backpackers4u.pixnet.net/blog";
-        const readerApi = "https://r.jina.ai/" + targetUrl;
-
-        try {
-            const res = await fetch(readerApi);
-            if (!res.ok) throw new Error("API 回應錯誤");
-            
-            const plainText = await res.text();
-            const count = extractSuper(plainText);
-
-            if (count > 0) {
-                status.style.borderLeftColor = "#2e7d32";
-                status.innerText = `✅ 剝離成功！自動抓取到 ${count} 筆資料。`;
-                checkCode(true);
-            } else {
-                status.style.borderLeftColor = "#d32f2f";
-                status.innerText = "⚠ 讀取成功，但純文字內找不到代碼格式，可能是標題未更新。";
-            }
-        } catch (err) {
-            console.error(err);
-            status.style.borderLeftColor = "#d32f2f";
-            status.innerText = "❌ 解析引擎遭到阻擋，請直接使用下方的「本地強制解析」。";
-        } finally {
-            btn.disabled = false;
-        }
-    }
-
-    function parseManual() {
-        const input = document.getElementById('manualInput').value;
-        if (!input.trim()) { alert("請先貼上文字！"); return; }
-        const count = extractSuper(input);
-        if (count > 0) {
-            const status = document.getElementById('status');
-            status.innerText = `✅ 本地解析成功！抓到 ${count} 筆。`;
-            status.style.borderLeftColor = "#2e7d32";
-            document.getElementById('manualInput').value = "";
-            checkCode(true);
-        } else {
-            alert("抱歉，這段文字裡沒有找到「X月」和「5位數代碼」。");
-        }
-    }
-
-    function checkCode(showAlert = false) {
-        const m = document.getElementById('mSel').value;
-        const resBox = document.getElementById('result-box');
-        let latestYear = Object.keys(db).sort().pop() || "2026";
-
-        if (db[latestYear] && db[latestYear][m]) {
-            resBox.style.display = 'block';
-            document.getElementById('res-title').innerText = `${latestYear}年 ${m}月 認證碼`;
-            document.getElementById('res-code').innerText = db[latestYear][m];
-        } else {
-            resBox.style.display = 'none';
-            if (showAlert) alert(`目前尚未抓到 ${m} 月的代碼哦！`);
-        }
-    }
-
-    function copyResult() {
-        navigator.clipboard.writeText(document.getElementById('res-code').innerText);
-        alert("代碼已複製！");
-    }
-
-    window.onload = () => {
-        const m = new Date().getMonth() + 1;
-        document.getElementById('mSel').value = m;
-        if (Object.keys(db).length > 0) {
-            document.getElementById('status').innerText = "💡 已載入上次記憶的代碼，可直接查詢";
-            checkCode();
+    // 資料庫：整合自您提供的網站內容
+    const data = {
+        "2026": {
+            "1": "88409"
+        },
+        "2025": {
+            "12": "34652", "11": "26758", "10": "95721", "9": "66048",
+            "8": "88577", "7": "15453", "6": "63832", "5": "34747",
+            "4": "95343", "3": "72125", "2": "21179", "1": "53069"
+        },
+        "2024": {
+            "12": "58182", "11": "64441", "10": "75313", "9": "50154",
+            "8": "75679", "7": "74276", "6": "44050", "5": "11324",
+            "4": "46619", "3": "47337", "2": "98989", "1": "46860"
+        },
+        "2023": {
+            "12": "56237", "11": "91531", "10": "68567", "9": "76621",
+            "8": "63224", "7": "80451", "6": "98260", "5": "82520",
+            "4": "58230", "3": "99804", "2": "23607", "1": "41258"
+        },
+        "2022": {
+            "11": "93637"
         }
     };
+
+    function findCode() {
+        const year = document.getElementById('year').value;
+        const month = document.getElementById('month').value;
+        const resultDiv = document.getElementById('result');
+
+        if (data[year] && data[year][month]) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.color = '#333';
+            resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em;">${data[year][month]}</span>`;
+        } else {
+            resultDiv.style.display = 'block';
+            resultDiv.style.color = '#777';
+            resultDiv.innerHTML = `查無 ${year}年${month}月 的資料。<br>(可能尚未更新或太久遠)`;
+        }
+    }
+    
+    // 初始化設定選單為當前時間
+    window.onload = function() {
+        const now = new Date();
+        const currentYear = now.getFullYear().toString();
+        const currentMonth = (now.getMonth() + 1).toString();
+        
+        const yearSelect = document.getElementById('year');
+        if (yearSelect.querySelector(`option[value="${currentYear}"]`)) {
+            yearSelect.value = currentYear;
+        }
+        
+        document.getElementById('month').value = currentMonth;
+    }
 </script>
 
 </body>
