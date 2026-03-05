@@ -43,7 +43,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
-            box-sizing: border-box; /* 確保 padding 不會撐大寬度 */
+            box-sizing: border-box; 
         }
         button {
             width: 100%;
@@ -56,10 +56,27 @@
             cursor: pointer;
             transition: background 0.3s;
             margin-top: 10px;
+            font-weight: bold;
         }
         button:hover {
             background-color: #b71c1c;
         }
+        /* 新增：更新按鈕的樣式 */
+        .btn-update {
+            background-color: #1976d2;
+            margin-bottom: 5px;
+            margin-top: 0;
+        }
+        .btn-update:hover { background-color: #115293; }
+        .btn-update:disabled { background-color: #90caf9; cursor: wait; }
+        
+        #update-status {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
         #result {
             margin-top: 25px;
             font-size: 24px;
@@ -70,13 +87,14 @@
             background: #fff3e0;
             border-radius: 5px;
             border: 1px dashed #ff9800;
-            display: none; /* 預設隱藏 */
+            display: none; 
         }
         .note {
             margin-top: 20px;
             font-size: 12px;
             color: #888;
             text-align: left;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -84,6 +102,9 @@
 
 <div class="container">
     <h2>🍣 壽司郎認證碼查詢</h2>
+    
+    <button id="updateBtn" class="btn-update" onclick="updateFromSearch()">🔄 從網路搜尋最新代碼</button>
+    <div id="update-status">💡 點擊上方按鈕，自動搜尋最新月份文章</div>
     
     <div class="input-group">
         <label for="year">年份 (西元)</label>
@@ -119,37 +140,24 @@
     <div id="result"></div>
     
     <div class="note">
-        ※ 資料來源：backpackers4u<br>
+        ※ 系統會自動搜尋「【年份 台灣壽司郎】月份填問卷」之第一筆結果進行解析。<br>
         ※ 認證碼為該月份通用，不分日期。<br>
-        ※ 若查無資料，代表該月份尚未更新。
+        ※ 若查無資料，請點擊上方藍色按鈕進行網路更新。
     </div>
 </div>
 
 <script>
-    // 資料庫：整合自您提供的網站內容
-    const data = {
-        "2026": {
-            "1": "88409"
-        },
-        "2025": {
-            "12": "34652", "11": "26758", "10": "95721", "9": "66048",
-            "8": "88577", "7": "15453", "6": "63832", "5": "34747",
-            "4": "95343", "3": "72125", "2": "21179", "1": "53069"
-        },
-        "2024": {
-            "12": "58182", "11": "64441", "10": "75313", "9": "50154",
-            "8": "75679", "7": "74276", "6": "44050", "5": "11324",
-            "4": "46619", "3": "47337", "2": "98989", "1": "46860"
-        },
-        "2023": {
-            "12": "56237", "11": "91531", "10": "68567", "9": "76621",
-            "8": "63224", "7": "80451", "6": "98260", "5": "82520",
-            "4": "58230", "3": "99804", "2": "23607", "1": "41258"
-        },
-        "2022": {
-            "11": "93637"
-        }
+    // 資料庫：結合您提供的預設值，並加入 LocalStorage 記憶功能
+    // 這樣更新過的資料關掉網頁也不會消失
+    const defaultData = {
+        "2026": { "1": "88409" },
+        "2025": { "12": "34652", "11": "26758", "10": "95721", "9": "66048", "8": "88577", "7": "15453", "6": "63832", "5": "34747", "4": "95343", "3": "72125", "2": "21179", "1": "53069" },
+        "2024": { "12": "58182", "11": "64441", "10": "75313", "9": "50154", "8": "75679", "7": "74276", "6": "44050", "5": "11324", "4": "46619", "3": "47337", "2": "98989", "1": "46860" },
+        "2023": { "12": "56237", "11": "91531", "10": "68567", "9": "76621", "8": "63224", "7": "80451", "6": "98260", "5": "82520", "4": "58230", "3": "99804", "2": "23607", "1": "41258" },
+        "2022": { "11": "93637" }
     };
+
+    let data = JSON.parse(localStorage.getItem('sushi_data_v4')) || defaultData;
 
     function findCode() {
         const year = document.getElementById('year').value;
@@ -163,7 +171,91 @@
         } else {
             resultDiv.style.display = 'block';
             resultDiv.style.color = '#777';
-            resultDiv.innerHTML = `查無 ${year}年${month}月 的資料。<br>(可能尚未更新或太久遠)`;
+            resultDiv.innerHTML = `查無 ${year}年${month}月 的資料。<br>(請點擊上方藍色按鈕更新)`;
+        }
+    }
+
+    // 網路搜尋與解析引擎
+    async function updateFromSearch() {
+        const btn = document.getElementById('updateBtn');
+        const statusDiv = document.getElementById('update-status');
+        
+        btn.disabled = true;
+        statusDiv.style.color = "#f57c00";
+        statusDiv.innerHTML = "🔍 正在透過搜尋引擎尋找最新文章...";
+
+        // 取得現在的年份，組合出搜尋關鍵字
+        const currentYear = new Date().getFullYear();
+        const searchQuery = `【${currentYear} 台灣壽司郎】月份填問卷 backpackers4u`;
+        
+        // 使用無阻擋的 DuckDuckGo HTML 搜尋引擎取代 Google (結果相同，但不會有 Captcha)
+        const proxyUrl = "https://api.allorigins.win/get?url=";
+        const searchEngineUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+
+        try {
+            // 第一階段：取得搜尋結果第一頁
+            const searchRes = await fetch(proxyUrl + encodeURIComponent(searchEngineUrl));
+            if (!searchRes.ok) throw new Error("搜尋引擎連線失敗");
+            
+            const searchData = await searchRes.json();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(searchData.contents, "text/html");
+            
+            // 抓取第一筆搜尋結果的網址
+            const firstResult = doc.querySelector('.result__url');
+            if (!firstResult) throw new Error("找不到相關的部落格文章");
+            
+            let targetArticleUrl = firstResult.getAttribute('href');
+            if (targetArticleUrl.startsWith('//')) {
+                targetArticleUrl = 'https:' + targetArticleUrl;
+            }
+
+            statusDiv.innerHTML = "📄 找到最新文章！正在進入擷取代碼...";
+
+            // 第二階段：進入該文章抓取代碼
+            const articleRes = await fetch(proxyUrl + encodeURIComponent(targetArticleUrl));
+            if (!articleRes.ok) throw new Error("部落格連線失敗");
+            
+            const articleData = await articleRes.json();
+            
+            // 將網頁 HTML 轉為純文字，去除排版雜訊
+            let plainText = articleData.contents.replace(/<[^>]+>/g, ' ').replace(/&[a-zA-Z0-9#]+;/g, ' ');
+
+            // 第三階段：嚴格匹配您要求的字串格式
+            // 符合 "台灣壽司郎 2026 3月份   認證碼 88409" 的邏輯
+            // \s* 代表容忍中間有多少空白或斷行
+            const regex = /台灣壽司郎\s*(202[4-9])\s*(\d{1,2})\s*月份?\s*認證碼\s*(\d{5})/g;
+            
+            let match;
+            let updateCount = 0;
+
+            while ((match = regex.exec(plainText)) !== null) {
+                const y = match[1];
+                const m = match[2];
+                const code = match[3];
+
+                if (!data[y]) data[y] = {};
+                data[y][m] = code;
+                updateCount++;
+            }
+
+            if (updateCount > 0) {
+                // 儲存進瀏覽器記憶體
+                localStorage.setItem('sushi_data_v4', JSON.stringify(data));
+                statusDiv.style.color = "#2e7d32";
+                statusDiv.innerHTML = `✅ 更新成功！從搜尋結果抓取到 ${updateCount} 筆代碼。`;
+                findCode(); // 自動刷新目前的查詢結果
+            } else {
+                statusDiv.style.color = "#d32f2f";
+                statusDiv.innerHTML = "⚠️ 進入了文章，但裡面沒有符合「台灣壽司郎 2026 X月份 認證碼 XXXXX」格式的文字。";
+            }
+
+        } catch (error) {
+            console.error(error);
+            statusDiv.style.color = "#d32f2f";
+            statusDiv.innerHTML = `❌ 更新失敗：${error.message} (請稍後再試)`;
+        } finally {
+            btn.disabled = false;
         }
     }
     
@@ -174,11 +266,19 @@
         const currentMonth = (now.getMonth() + 1).toString();
         
         const yearSelect = document.getElementById('year');
-        if (yearSelect.querySelector(`option[value="${currentYear}"]`)) {
-            yearSelect.value = currentYear;
+        // 動態補上未來的年份 (如果選單沒有的話)
+        if (!yearSelect.querySelector(`option[value="${currentYear}"]`)) {
+            const newOption = document.createElement('option');
+            newOption.value = currentYear;
+            newOption.text = currentYear;
+            yearSelect.insertBefore(newOption, yearSelect.firstChild);
         }
         
+        yearSelect.value = currentYear;
         document.getElementById('month').value = currentMonth;
+        
+        // 嘗試自動查詢一次
+        findCode();
     }
 </script>
 
