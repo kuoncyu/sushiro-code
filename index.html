@@ -3,42 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎認證碼 - 穩定掃描版</title>
+    <title>壽司郎認證碼 - 終極穩定版</title>
     <style>
-        :root { --sushi-red: #d32f2f; --sushi-gold: #ffb300; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
-        h2 { color: var(--sushi-red); margin-bottom: 20px; border-bottom: 3px solid var(--sushi-red); display: inline-block; padding-bottom: 8px;}
-        .card { background: #fffcf0; border: 1px solid #ffe082; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
-        select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; font-size: 16px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-update { background: #007bff; color: white; margin-bottom: 15px; }
-        .btn-update:disabled { background: #ccc; cursor: not-allowed;}
-        .btn-search { background: var(--sushi-red); color: white; }
-        .btn-search:hover { background-color: #b71c1c; }
-        #status { font-size: 13px; color: #666; margin-bottom: 10px; min-height: 20px; line-height: 1.4; font-weight: bold;}
-        #result-display { margin-top: 20px; padding: 15px; border-radius: 10px; background: white; border: 2px dashed var(--sushi-gold); display: none; }
-        .code-num { font-size: 36px; color: var(--sushi-red); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 3px; }
-        .copy-btn { font-size: 13px; color: #007bff; cursor: pointer; text-decoration: underline; }
+        :root { --main-red: #e63946; --bg-color: #f1faee; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 95%; max-width: 420px; text-align: center; }
+        h1 { color: var(--main-red); font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid var(--main-red); padding-bottom: 10px;}
+        .status-box { background: #eee; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; color: #555; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+        .selector-group { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; }
+        label { font-weight: bold; color: #333; font-size: 14px; }
+        select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-update { background: #457b9d; color: white; margin-bottom: 10px; }
+        .btn-update:hover { background: #1d3557; }
+        .btn-update:disabled { background: #ccc; cursor: wait; }
+        .btn-search { background: var(--main-red); color: white; }
+        .btn-search:hover { background: #c1121f; }
+        #result { margin-top: 20px; padding: 20px; border: 2px solid #ffb703; border-radius: 10px; background: #fffcf2; display: none; }
+        .code { font-size: 42px; color: var(--main-red); font-weight: bold; letter-spacing: 4px; margin: 10px 0; display: block; }
+        .copy-hint { font-size: 12px; color: #0077b6; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🍣 壽司郎代碼查詢</h2>
+    <h1>🍣 壽司郎認證碼查詢</h1>
     
-    <button id="updateBtn" class="btn-update" onclick="deepScanSafe()">🔄 掃描最新月份 (防擋版)</button>
-    <div id="status">💡 已載入本地記憶資料</div>
+    <div class="status-box" id="status">首次使用請先點擊下方更新</div>
+    
+    <button id="updateBtn" class="btn-update" onclick="fetchAllCodes()">🔄 深度同步部落格資料</button>
 
-    <div class="card">
-        <label>選擇年份</label>
-        <select id="yearSel">
+    <div class="selector-group">
+        <label>年份</label>
+        <select id="ySelect">
             <option value="2026">2026</option>
             <option value="2025">2025</option>
         </select>
-        <label>選擇月份</label>
-        <select id="monthSel">
+        <label>月份</label>
+        <select id="mSelect">
             <option value="1">1月</option><option value="2">2月</option>
             <option value="3" selected>3月</option><option value="4">4月</option>
             <option value="5">5月</option><option value="6">6月</option>
@@ -48,158 +50,125 @@
         </select>
     </div>
 
-    <button class="btn-search" onclick="doQuery()">🔍 立即查詢</button>
+    <button class="btn-search" onclick="showCode()">🔍 查詢結果</button>
 
-    <div id="result-display">
-        <span id="res-date" style="color: #666; font-weight: bold;"></span>
-        <span class="code-num" id="res-code">-----</span>
-        <span class="copy-btn" onclick="copyToClipboard()">點我複製代碼</span>
+    <div id="result">
+        <div id="res-title" style="font-weight:bold; color:#666;"></div>
+        <span class="code" id="res-code">-----</span>
+        <div class="copy-hint" onclick="copyCode()">點此複製序號</div>
     </div>
 </div>
 
 <script>
-    // 步驟 1: 嘗試從瀏覽器記憶 (LocalStorage) 讀取資料，若無則使用預設值
-    let db = JSON.parse(localStorage.getItem('sushiroCodes')) || {
-        "2026": { "1": "88409" },
-        "2025": { "12": "34652", "11": "26758" }
-    };
+    // 優先從記憶體讀取，否則空物件
+    let sushiroDB = JSON.parse(localStorage.getItem('sushiro_v3')) || {};
 
-    function doQuery() {
-        const y = document.getElementById('yearSel').value;
-        const m = document.getElementById('monthSel').value;
-        const disp = document.getElementById('result-display');
-        
-        if (db[y] && db[y][m]) {
-            disp.style.display = 'block';
-            document.getElementById('res-date').innerText = `${y} 年 ${m} 月`;
-            document.getElementById('res-code').innerText = db[y][m];
+    // 顯示結果
+    function showCode() {
+        const y = document.getElementById('ySelect').value;
+        const m = document.getElementById('mSelect').value;
+        const resDiv = document.getElementById('result');
+        const codeSpan = document.getElementById('res-code');
+        const titleDiv = document.getElementById('res-title');
+
+        if (sushiroDB[y] && sushiroDB[y][m]) {
+            resDiv.style.display = 'block';
+            titleDiv.innerText = `${y}年 ${m}月 認證碼`;
+            codeSpan.innerText = sushiroDB[y][m];
         } else {
-            alert(`目前資料庫沒有 ${y} 年 ${m} 月的資料。\n請點擊上方的「掃描」按鈕去部落格抓取！`);
+            alert(`找不到 ${y}年${m}月 的資料，請點擊更新按鈕再試一次！`);
         }
     }
 
-    function copyToClipboard() {
-        const text = document.getElementById('res-code').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector('.copy-btn');
-            btn.innerText = "✅ 已複製！";
-            btn.style.color = "#2e7d32";
-            setTimeout(() => { btn.innerText = "點我複製代碼"; btn.style.color = "#007bff"; }, 2000);
+    // 複製功能
+    function copyCode() {
+        const c = document.getElementById('res-code').innerText;
+        navigator.clipboard.writeText(c).then(() => {
+            alert("代碼已複製到剪貼簿！");
         });
     }
 
-    // 延遲函數，避免被伺服器阻擋
-    const delay = ms => new Promise(res => setTimeout(res, ms));
-
-    async function deepScanSafe() {
+    // 主更新程式
+    async function fetchAllCodes() {
         const btn = document.getElementById('updateBtn');
         const status = document.getElementById('status');
-        const proxy = "https://api.allorigins.win/get?url=";
-        const blogUrl = "https://backpackers4u.pixnet.net/blog";
+        
+        // 換用另一個 Proxy 增加穩定度
+        const proxyPrefix = "https://api.allorigins.win/get?url=";
+        const blogHome = "https://backpackers4u.pixnet.net/blog";
 
         btn.disabled = true;
-        status.style.color = "#f57c00";
-        status.innerText = "🔍 正在搜尋部落格首頁 (1/2)...";
+        status.innerText = "⏳ 正在連線至部落格首頁...";
 
         try {
-            const res = await fetch(proxy + encodeURIComponent(blogUrl));
-            if (!res.ok) throw new Error("首頁讀取失敗");
-            
-            const data = await res.json();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.contents, "text/html");
-            const links = Array.from(doc.querySelectorAll('a'));
+            // 1. 抓取首頁
+            const homeRes = await fetch(proxyPrefix + encodeURIComponent(blogHome));
+            const homeJson = await homeRes.json();
+            const doc = new DOMParser().parseFromString(homeJson.contents, "text/html");
+            const allLinks = Array.from(doc.querySelectorAll('a'));
 
-            let articleUrls = [];
-            
-            // 嚴格過濾：必須要有 href 屬性，且為文章連結，且標題包含壽司郎
-            for (let a of links) {
-                const href = a.getAttribute('href');
-                const txt = a.innerText || "";
-                
-                // 修正了上一版的致命錯誤，確保 href 不是 null
-                if (href && href.includes('/blog/post/') && txt.includes("壽司郎")) {
+            // 2. 篩選出最相關的「兩篇」文章 (通常就是這個月跟上個月)
+            let urls = [];
+            for (let a of allLinks) {
+                const text = a.innerText || "";
+                const href = a.getAttribute('href') || "";
+                if (text.includes("壽司郎") && href.includes("/post/")) {
                     const fullUrl = href.startsWith('http') ? href : "https://backpackers4u.pixnet.net" + href;
-                    if (!articleUrls.includes(fullUrl)) {
-                        articleUrls.push(fullUrl);
-                    }
-                    // 為了避免被代理伺服器阻擋，這次我們只掃描最新「2篇」文章即可涵蓋跨月狀況
-                    if (articleUrls.length >= 2) break; 
+                    if (!urls.includes(fullUrl)) urls.push(fullUrl);
+                }
+                if (urls.length >= 2) break;
+            }
+
+            if (urls.length === 0) throw new Error("找不到相關文章連結");
+
+            status.innerText = `📡 發現文章，深度掃描內容中...`;
+            let foundCount = 0;
+
+            // 3. 遍歷文章內容
+            for (let i = 0; i < urls.length; i++) {
+                status.innerText = `📄 掃描第 ${i+1}/${urls.length} 篇文章...`;
+                const artRes = await fetch(proxyPrefix + encodeURIComponent(urls[i]));
+                const artJson = await artRes.json();
+                const content = artJson.contents;
+
+                // 4. 強力正則表達式：抓取 (202x) + (1-12月) + (5位數字)
+                // 這個正則可以應對「3月：88409」或「3月份認證碼88409」
+                const regex = /(202\d)\s*年?\s*(\d{1,2})\s*月[份]?.*?(\d{5})/g;
+                let m;
+                while ((m = regex.exec(content)) !== null) {
+                    const year = m[1];
+                    const month = m[2];
+                    const code = m[3];
+                    if (!sushiroDB[year]) sushiroDB[year] = {};
+                    sushiroDB[year][month] = code;
+                    foundCount++;
                 }
             }
 
-            if (articleUrls.length === 0) throw new Error("首頁找不到相關的壽司郎文章");
-
-            let totalFound = 0;
-            
-            // 逐篇抓取，並加入 1 秒鐘的延遲 (Delay) 保護
-            for (let i = 0; i < articleUrls.length; i++) {
-                status.innerText = `📡 正在解析文章內文 (${i+1}/${articleUrls.length})...`;
-                
-                // 這裡就是防阻擋的關鍵延遲
-                if (i > 0) await delay(1000); 
-
-                const subRes = await fetch(proxy + encodeURIComponent(articleUrls[i]));
-                if (!subRes.ok) continue; // 若單篇失敗，跳過繼續下一篇
-                
-                const subData = await subRes.json();
-                const content = subData.contents;
-
-                const regex = /(202[4-7])\s*年?\s*(\d{1,2})\s*月(?:份)?\s*(?:認證碼)?\s*(\d{5})/g;
-                let match;
-                while ((match = regex.exec(content)) !== null) {
-                    const y = match[1], m = match[2], c = match[3];
-                    if (!db[y]) db[y] = {};
-                    db[y][m] = c;
-                    totalFound++;
-                }
-            }
-
-            if (totalFound > 0) {
-                status.style.color = "#2e7d32";
-                status.innerText = `✅ 掃描完成！共找到 ${totalFound} 筆代碼，已為您自動記憶。`;
-                
-                // 步驟 2: 把最新的 db 存入 LocalStorage 永久記憶
-                localStorage.setItem('sushiroCodes', JSON.stringify(db));
-                
-                doQuery(); // 更新完自動查詢畫面上選定的月份
+            if (foundCount > 0) {
+                localStorage.setItem('sushiro_v3', JSON.stringify(sushiroDB));
+                status.style.color = "green";
+                status.innerText = `✅ 更新成功！已儲存 ${foundCount} 筆代碼。`;
+                showCode();
             } else {
-                status.style.color = "#d32f2f";
-                status.innerText = "⚠ 掃描完畢，但未在文章內發現符合格式的代碼。";
+                status.innerText = "⚠ 讀取成功但找不到代碼格式，可能是部落客改變了寫法。";
             }
 
         } catch (err) {
-            status.style.color = "red";
-            status.innerText = "❌ 掃描失敗：網路不穩或代理伺服器忙碌，請稍後再試。";
             console.error(err);
+            status.style.color = "red";
+            status.innerText = "❌ 讀取失敗：代理伺服器忙碌中，請間隔 10 秒後再點一次。";
         } finally {
             btn.disabled = false;
-            // 5秒後恢復狀態文字
-            setTimeout(() => {
-                if (status.innerText.includes("掃描完成")) {
-                    status.style.color = "#666";
-                    status.innerText = "💡 已載入本地記憶資料";
-                }
-            }, 5000);
         }
     }
-    
-    // 網頁載入時自動執行一次查詢 (讀取記憶)
-    window.onload = function() {
-        const now = new Date();
-        const currentYear = now.getFullYear().toString();
-        const currentMonth = (now.getMonth() + 1).toString();
-        
-        if (document.querySelector(`#yearSel option[value="${currentYear}"]`)) {
-            document.getElementById('yearSel').value = currentYear;
+
+    // 初始化顯示
+    window.onload = () => {
+        if (Object.keys(sushiroDB).length > 0) {
+            status.innerText = "💡 已從本地快取載入上次更新資料";
         }
-        document.getElementById('monthSel').value = currentMonth;
-        
-        // 若記憶體中有本月資料，就直接顯示
-        if (db[currentYear] && db[currentYear][currentMonth]) {
-            doQuery();
-        }
-    }
+    };
 </script>
 
 </body>
