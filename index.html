@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>壽司郎問卷認證碼查詢器</title>
+    <title>壽司郎認證碼查詢器 (終極整合版)</title>
     <style>
         body {
             font-family: "Microsoft JhengHei", Arial, sans-serif;
@@ -20,70 +20,124 @@
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             text-align: center;
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
+            max-height: 95vh;
+            overflow-y: auto;
         }
         h2 {
             color: #d32f2f;
             margin-bottom: 20px;
+            margin-top: 0;
         }
+        .update-box {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #c8e6c9;
+            text-align: left;
+        }
+        .step-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .update-box input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #a5d6a7;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        
+        /* 按鈕共用設定 */
+        button {
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        
+        /* Google 搜尋按鈕 */
+        .btn-google {
+            background-color: #fbbc05;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .btn-google:hover { background-color: #f2a900; }
+        
+        /* 抓取代碼按鈕 */
+        .btn-update {
+            background-color: #2e7d32;
+        }
+        .btn-update:hover { background-color: #1b5e20; }
+        .btn-update:disabled { background-color: #a5d6a7; cursor: wait; }
+        
+        /* 查詢序號按鈕 */
+        .btn-search {
+            background-color: #d32f2f;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .btn-search:hover { background-color: #b71c1c; }
+
+        #update-status {
+            font-size: 13px;
+            color: #555;
+            margin-top: 10px;
+            min-height: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
         .input-group {
             margin-bottom: 15px;
             text-align: left;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        select, input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box; /* 確保 padding 不會撐大寬度 */
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #b71c1c;
-        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        
         #result {
             margin-top: 25px;
             font-size: 24px;
             font-weight: bold;
             color: #333;
             min-height: 1.2em;
-            padding: 10px;
+            padding: 15px;
             background: #fff3e0;
             border-radius: 5px;
             border: 1px dashed #ff9800;
-            display: none; /* 預設隱藏 */
+            display: none; 
         }
-        .note {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
-            text-align: left;
-        }
+        .note { margin-top: 20px; font-size: 12px; color: #888; text-align: left; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>🍣 壽司郎認證碼查詢</h2>
+
+    <div class="update-box">
+        <span class="step-title">📍 步驟一：尋找最新文章</span>
+        <button class="btn-google" onclick="openGoogleSearch()">🔍 點我開啟 Google 自動搜尋</button>
+        
+        <span class="step-title" style="margin-top: 5px;">📍 步驟二：貼上網址，呼叫 Google 抓取</span>
+        <input type="text" id="articleUrl" placeholder="請貼上 backpackers4u 該月份文章網址...">
+        <button id="updateBtn" class="btn-update" onclick="fetchWithGAS()">🚀 透過 Google 伺服器抓取</button>
+        <div id="update-status"></div>
+    </div>
     
     <div class="input-group">
         <label for="year">年份 (西元)</label>
@@ -91,65 +145,52 @@
             <option value="2026">2026</option>
             <option value="2025">2025</option>
             <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
         </select>
     </div>
 
     <div class="input-group">
         <label for="month">月份</label>
         <select id="month">
-            <option value="1">1月</option>
-            <option value="2">2月</option>
-            <option value="3">3月</option>
-            <option value="4">4月</option>
-            <option value="5">5月</option>
-            <option value="6">6月</option>
-            <option value="7">7月</option>
-            <option value="8">8月</option>
-            <option value="9">9月</option>
-            <option value="10">10月</option>
-            <option value="11">11月</option>
-            <option value="12">12月</option>
+            <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+            <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+            <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+            <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
         </select>
     </div>
 
-    <button onclick="findCode()">查詢序號</button>
+    <button class="btn-search" onclick="findCode()">🍣 查詢序號</button>
 
     <div id="result"></div>
     
     <div class="note">
-        ※ 資料來源：backpackers4u<br>
-        ※ 認證碼為該月份通用，不分日期。<br>
-        ※ 若查無資料，代表該月份尚未更新。
+        ※ 系統已升級：內建自動 Google 搜尋功能，並透過專屬 GAS 雲端伺服器抓取。<br>
+        ※ 平時免連線即可查詢已記憶的代碼。
     </div>
 </div>
 
 <script>
-    // 資料庫：整合自您提供的網站內容
-    const data = {
-        "2026": {
-            "1": "88409"
-        },
-        "2025": {
-            "12": "34652", "11": "26758", "10": "95721", "9": "66048",
-            "8": "88577", "7": "15453", "6": "63832", "5": "34747",
-            "4": "95343", "3": "72125", "2": "21179", "1": "53069"
-        },
-        "2024": {
-            "12": "58182", "11": "64441", "10": "75313", "9": "50154",
-            "8": "75679", "7": "74276", "6": "44050", "5": "11324",
-            "4": "46619", "3": "47337", "2": "98989", "1": "46860"
-        },
-        "2023": {
-            "12": "56237", "11": "91531", "10": "68567", "9": "76621",
-            "8": "63224", "7": "80451", "6": "98260", "5": "82520",
-            "4": "58230", "3": "99804", "2": "23607", "1": "41258"
-        },
-        "2022": {
-            "11": "93637"
-        }
+    // 你的專屬 Google Web App 網址
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmzOk2IOdo_YAsayt_eKwTkB8ghBvEu-aHXEWKenoainpMfzq71q2t64FP8nmcOJq6/exec"; 
+
+    // 預設資料庫與 LocalStorage 記憶
+    const defaultData = {
+        "2026": { "1": "88409", "2": "66074", "3": "32873" },
+        "2025": { "12": "34652", "11": "26758", "10": "95721" }
     };
+    let data = JSON.parse(localStorage.getItem('sushi_gas_db')) || defaultData;
+
+    // 開啟 Google 搜尋 (自動帶入當前年份)
+    function openGoogleSearch() {
+        const currentYear = new Date().getFullYear();
+        const query = `【${currentYear} 台灣壽司郎】月份填問卷 backpackers4u`;
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        
+        window.open(googleUrl, '_blank');
+        
+        const statusDiv = document.getElementById('update-status');
+        statusDiv.innerHTML = "💡 提示：請在彈出的 Google 網頁中複製文章網址，貼到下方後點擊綠色抓取按鈕。";
+        statusDiv.style.color = "#1565c0";
+    }
 
     function findCode() {
         const year = document.getElementById('year').value;
@@ -158,12 +199,94 @@
 
         if (data[year] && data[year][month]) {
             resultDiv.style.display = 'block';
-            resultDiv.style.color = '#333';
-            resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em;">${data[year][month]}</span>`;
+            resultDiv.innerHTML = `📅 ${year}年${month}月<br>認證碼：<span style="color:#d32f2f; font-size:1.2em; letter-spacing:2px; cursor:pointer;" onclick="copyCode('${data[year][month]}')" title="點擊複製">${data[year][month]}</span><br><span style="font-size:12px; color:#007bff; font-weight:normal;">(點擊數字可複製)</span>`;
         } else {
             resultDiv.style.display = 'block';
-            resultDiv.style.color = '#777';
-            resultDiv.innerHTML = `查無 ${year}年${month}月 的資料。<br>(可能尚未更新或太久遠)`;
+            resultDiv.innerHTML = `<span style="font-size:16px; color:#777;">查無 ${year}年${month}月 的資料。<br>(請執行上方更新步驟)</span>`;
+        }
+    }
+
+    function copyCode(code) {
+        navigator.clipboard.writeText(code).then(() => alert("已複製代碼：" + code));
+    }
+
+    // 🚀 呼叫你的私人 Google 伺服器
+    async function fetchWithGAS() {
+        const urlInput = document.getElementById('articleUrl').value.trim();
+        const statusDiv = document.getElementById('update-status');
+        const btn = document.getElementById('updateBtn');
+
+        if (!urlInput) {
+            statusDiv.style.color = "#d32f2f";
+            statusDiv.innerHTML = "❌ 請先貼上文章網址！";
+            return;
+        }
+
+        btn.disabled = true;
+        statusDiv.style.color = "#f57c00";
+        statusDiv.innerHTML = "☁️ 正在呼叫 Google 伺服器前往抓取...";
+
+        try {
+            const requestUrl = `${GAS_WEB_APP_URL}?url=${encodeURIComponent(urlInput)}`;
+            const response = await fetch(requestUrl);
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error || "Google 伺服器回傳失敗");
+            }
+
+            statusDiv.innerHTML = "📄 成功抓回網頁，正在比對代碼...";
+
+            // 1. 將 HTML 轉為純文字
+            let plainText = result.content.replace(/<[^>]+>/g, ' ');
+            // 2. 清除 HTML 特殊符號 (像是 &nbsp;)
+            plainText = plainText.replace(/&[a-zA-Z0-9#]+;/g, ' ');
+            // 3. 把全形空白、隱藏空白全部轉換為標準的半形空白，並把連續空白壓縮成1格
+            plainText = plainText.replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000]/g, ' ')
+                                 .replace(/\s+/g, ' ');
+
+            // 🌟 4. 針對你提供的格式精準撰寫的規則：
+            // 會精準抓取：台灣壽司郎 2026 3月份 認證碼 32873
+            const regex = /台灣壽司郎\s*(202\d)\s*(\d{1,2})\s*月份?\s*認證碼\s*(\d{5})/g;
+            let match;
+            let updateCount = 0;
+
+            while ((match = regex.exec(plainText)) !== null) {
+                const y = match[1];
+                const m = match[2];
+                const code = match[3];
+                
+                if (!data[y]) data[y] = {};
+                data[y][m] = code;
+                updateCount++;
+                
+                // 動態增加年份選單 (如果遇到跨年新文章)
+                const yearSelect = document.getElementById('year');
+                if (!yearSelect.querySelector(`option[value="${y}"]`)) {
+                    const newOpt = document.createElement('option');
+                    newOpt.value = y; newOpt.text = y;
+                    yearSelect.insertBefore(newOpt, yearSelect.firstChild);
+                }
+            }
+
+            if (updateCount > 0) {
+                localStorage.setItem('sushi_gas_db', JSON.stringify(data));
+                statusDiv.style.color = "#2e7d32";
+                statusDiv.innerHTML = `✅ 成功！Google 伺服器完美抓取到 ${updateCount} 筆代碼。`;
+                document.getElementById('articleUrl').value = ""; 
+                findCode(); 
+            } else {
+                statusDiv.style.color = "#d32f2f";
+                statusDiv.innerHTML = "⚠️ Google 伺服器成功抓到網頁，但文章內沒有符合的代碼格式。";
+                console.log("純文字預覽:", plainText.substring(0, 1000));
+            }
+
+        } catch (error) {
+            console.error(error);
+            statusDiv.style.color = "#d32f2f";
+            statusDiv.innerHTML = `❌ 連線失敗：${error.message}`;
+        } finally {
+            btn.disabled = false;
         }
     }
     
@@ -174,11 +297,19 @@
         const currentMonth = (now.getMonth() + 1).toString();
         
         const yearSelect = document.getElementById('year');
-        if (yearSelect.querySelector(`option[value="${currentYear}"]`)) {
-            yearSelect.value = currentYear;
+        if (!yearSelect.querySelector(`option[value="${currentYear}"]`)) {
+            const newOption = document.createElement('option');
+            newOption.value = currentYear;
+            newOption.text = currentYear;
+            yearSelect.insertBefore(newOption, yearSelect.firstChild);
         }
-        
+        yearSelect.value = currentYear;
         document.getElementById('month').value = currentMonth;
+
+        if (localStorage.getItem('sushi_gas_db')) {
+            document.getElementById('update-status').innerHTML = "💡 系統已載入您上次透過 Google 抓取的最新代碼。";
+        }
+        findCode();
     }
 </script>
 
